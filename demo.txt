@@ -1,1 +1,0 @@
-npx neonctl@latest init
