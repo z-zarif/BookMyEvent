@@ -1,7 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -13,11 +14,16 @@ import Wallet from './pages/Wallet';
 import Wishlist from './pages/Wishlist';
 
 export default function App() {
+  const location = useLocation();
+  // Landing has its own minimal header, so skip the shared Navbar there
+  const hideNavbar = ['/', '/login', '/register'].includes(location.pathname);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/events" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/events/:id" element={<EventDetails />} />

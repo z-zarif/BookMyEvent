@@ -16,46 +16,87 @@ export default function Login() {
     try {
       const data = await login(email, password);
       loginUser(data.token, data.userName);
-      navigate('/');
+      navigate('/events');
     } catch (err) {
       setError(err.message);
     }
   }
 
   return (
-    <div className="max-w-sm mx-auto mt-16 bg-white border border-gray-200 rounded-xl p-6">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
-      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative flex flex-col items-center justify-center px-6 overflow-hidden">
+      <div className="grain-overlay" />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-xs text-gray-500 block mb-1">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 block mb-1">Password</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
-        </div>
-        <button className="w-full bg-indigo-600 text-white rounded-lg py-2 hover:bg-indigo-700">
-          Login
-        </button>
-      </form>
+      <Link
+        to="/"
+        className="absolute top-6 left-8 font-['Anton'] text-xl tracking-tight text-[#F5F3FF]/80 hover:text-white transition-colors z-10"
+      >
+        EVENTIA
+      </Link>
 
-      <p className="text-sm text-gray-500 mt-4">
-        No account? <Link to="/register" className="text-indigo-600">Register here</Link>
-      </p>
+      {/* Ticket stub card */}
+      <div className="relative z-10 w-full max-w-sm">
+        <div className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden">
+          {/* Stub header strip */}
+          <div
+            className="px-7 py-5 relative"
+            style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+          >
+            <p className="text-xs uppercase tracking-wide text-white/80">Admit one</p>
+            <h2 className="font-['Anton'] text-2xl tracking-tight text-white">Welcome back</h2>
+          </div>
+
+          {/* Perforation notches + dashed tear line */}
+          <div className="relative">
+            <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
+            <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
+            <div className="border-t border-dashed border-[#262636] mx-6" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4">
+            {error && (
+              <p className="text-[#FF3D77] text-sm bg-[#FF3D77]/10 border border-[#FF3D77]/30 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+
+            <div>
+              <label className="text-xs text-[#9C97B8] block mb-1.5">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-[#9C97B8] block mb-1.5">Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full text-white font-semibold rounded-lg py-3 mt-2 transition-transform hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+            >
+              Enter Eventia
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center text-sm text-[#9C97B8] mt-6">
+          New here? <Link to="/register" className="text-[#F5F3FF] underline underline-offset-4 decoration-[#7C3AED]">Create an account</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -12,9 +12,9 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-200">
-      <Link to="/" className="font-bold text-lg text-indigo-600">BookMyEvent</Link>
+      <Link to="/events" className="font-bold text-lg text-indigo-600">Eventia</Link>
       <div className="flex items-center gap-5 text-sm">
-        <Link to="/" className="hover:text-indigo-600">Events</Link>
+        <Link to="/events" className="hover:text-indigo-600">Events</Link>
         {isLoggedIn ? (
           <>
             <Link to="/wishlist" className="hover:text-indigo-600">Wishlist</Link>
