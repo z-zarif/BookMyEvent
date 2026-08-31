@@ -19,32 +19,66 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
-      <h1 className="text-2xl font-bold mb-6">Upcoming Events</h1>
-      {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-      {loading && <p className="text-gray-500">Loading events...</p>}
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
+      <div className="grain-overlay" />
 
-      {!loading && events.length === 0 && (
-        <p className="text-gray-500">No events scheduled right now.</p>
-      )}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-10">
+        <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">On sale now</p>
+        <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-8">
+          UPCOMING SHOWS
+        </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {events.map((ev) => (
-          <div key={ev.event_id} className="bg-white border border-gray-200 rounded-xl p-4">
-            <span className="inline-block bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-full mb-2">
-              {ev.status}
-            </span>
-            <h3 className="font-semibold">{ev.title}</h3>
-            <p className="text-gray-500 text-sm">{formatDate(ev.event_date_time)}</p>
-            <p className="text-gray-500 text-sm mb-3">{ev.venue}</p>
-            <Link
-              to={`/events/${ev.event_id}`}
-              className="inline-block bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-indigo-700"
+        {error && (
+          <p className="text-[#FF3D77] text-sm bg-[#FF3D77]/10 border border-[#FF3D77]/30 rounded-lg px-4 py-3 mb-6">
+            {error}
+          </p>
+        )}
+        {loading && <p className="text-[#9C97B8]">Loading shows...</p>}
+
+        {!loading && events.length === 0 && !error && (
+          <p className="text-[#9C97B8]">Nothing on the calendar yet. Check back soon.</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          {events.map((ev) => (
+            <div
+              key={ev.event_id}
+              className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden group hover:border-[#7C3AED]/60 transition-colors"
             >
-              View Details
-            </Link>
-          </div>
-        ))}
+              {/* Ticket-stub header strip */}
+              <div
+                className="px-5 py-3 relative"
+                style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+              >
+                <span className="text-xs uppercase tracking-wide text-white/80">
+                  {ev.status}
+                </span>
+              </div>
+
+              {/* Notches + dashed tear line */}
+              <div className="relative">
+                <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
+                <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
+                <div className="border-t border-dashed border-[#262636] mx-5" />
+              </div>
+
+              <div className="px-5 py-5">
+                <h3 className="font-['Anton'] text-xl tracking-tight mb-1">{ev.title}</h3>
+                <p className="text-[#9C97B8] text-sm">{formatDate(ev.event_date_time)}</p>
+                <p className="text-[#9C97B8] text-sm">{ev.venue}</p>
+                <p className="text-[#9C97B8]/70 text-xs mt-1 mb-4">Hosted by {ev.user_name}</p>
+
+                <Link
+                  to={`/events/${ev.event_id}`}
+                  className="inline-block w-full text-center text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-transform group-hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

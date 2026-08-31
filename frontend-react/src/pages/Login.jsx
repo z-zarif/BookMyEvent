@@ -15,7 +15,7 @@ export default function Login() {
     setError('');
     try {
       const data = await login(email, password);
-      loginUser(data.token, data.userName);
+      loginUser(data.token, data.user);
       navigate('/events');
     } catch (err) {
       setError(err.message);

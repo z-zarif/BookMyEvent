@@ -11,21 +11,34 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-200">
-      <Link to="/events" className="font-bold text-lg text-indigo-600">Eventia</Link>
-      <div className="flex items-center gap-5 text-sm">
-        <Link to="/events" className="hover:text-indigo-600">Events</Link>
+    <nav className="flex items-center justify-between px-8 py-4 bg-[#0B0B14] border-b border-[#262636]">
+      <Link to="/events" className="font-['Anton'] text-xl tracking-tight text-[#F5F3FF]">
+        EVENTIA
+      </Link>
+      <div className="flex items-center gap-6 text-sm font-['Manrope'] text-[#9C97B8]">
+        <Link to="/events" className="hover:text-[#F5F3FF] transition-colors">Events</Link>
         {isLoggedIn ? (
           <>
-            <Link to="/wishlist" className="hover:text-indigo-600">Wishlist</Link>
-            <Link to="/my-bookings" className="hover:text-indigo-600">My Bookings</Link>
-            <Link to="/wallet" className="hover:text-indigo-600">Wallet</Link>
-            <button onClick={handleLogout} className="text-red-600 hover:underline">Logout</button>
+            <Link to="/wishlist" className="hover:text-[#F5F3FF] transition-colors">Wishlist</Link>
+            <Link to="/my-bookings" className="hover:text-[#F5F3FF] transition-colors">My Bookings</Link>
+            <Link to="/wallet" className="hover:text-[#F5F3FF] transition-colors">Wallet</Link>
+            <button
+              onClick={handleLogout}
+              className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors"
+            >
+              Logout
+            </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-indigo-600">Login</Link>
-            <Link to="/register" className="hover:text-indigo-600">Register</Link>
+            <Link to="/login" className="hover:text-[#F5F3FF] transition-colors">Login</Link>
+            <Link
+              to="/register"
+              className="font-semibold px-4 py-1.5 rounded-full text-white"
+              style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+            >
+              Sign up
+            </Link>
           </>
         )}
       </div>

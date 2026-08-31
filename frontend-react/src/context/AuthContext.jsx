@@ -4,25 +4,31 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [userName, setUserName] = useState(localStorage.getItem('userName'));
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
 
-  function loginUser(newToken, newUserName) {
+  // Backend now returns a nested user object: { user_id, user_name, email }.
+  // Store the whole thing so components can read user.user_name, user.user_id, etc.
+  function loginUser(newToken, newUser) {
     localStorage.setItem('token', newToken);
-    localStorage.setItem('userName', newUserName);
+    localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
-    setUserName(newUserName);
+    setUser(newUser);
   }
 
   function logoutUser() {
     localStorage.removeItem('token');
-    localStorage.removeItem('userName');
+    localStorage.removeItem('user');
     setToken(null);
-    setUserName(null);
+    setUser(null);
   }
 
   const value = {
     token,
-    userName,
+    user,
+    userName: user?.user_name,
     isLoggedIn: !!token,
     loginUser,
     logoutUser,

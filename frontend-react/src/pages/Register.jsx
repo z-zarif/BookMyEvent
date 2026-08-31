@@ -7,7 +7,7 @@ export default function Register() {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [gender, setGender] = useState('');
+  const [gender, setGender] = useState('prefer_not_to_say');
   const [error, setError] = useState('');
   const { loginUser } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function Register() {
     setError('');
     try {
       const data = await register(userName, email, password, gender);
-      loginUser(data.token, data.userName);
+      loginUser(data.token, data.user);
       navigate('/events');
     } catch (err) {
       setError(err.message);
@@ -104,7 +104,7 @@ export default function Register() {
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] focus:outline-none focus:border-[#7C3AED] transition-colors"
               >
-                <option value="">Prefer not to say</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
