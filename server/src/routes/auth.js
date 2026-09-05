@@ -6,8 +6,8 @@ import pool from "../db/db.js";
 const router = express.Router();
 // Creates a new Express Router to define and organize routes.
 //An Express Router is like a mini Express application that lets you group related API routes into a separate file.
+//! Creates a POST route for registering a new user.
 router.post("/register/user", async (req, res) => {
-  // Creates a POST route for registering a new user.
   const { userName, email, password, gender } = req.body;
   if (!userName || !email || !password || !gender) {
     return res

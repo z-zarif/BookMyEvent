@@ -64,49 +64,40 @@ EXECUTE FUNCTION fn_ticket_type_auto_status();
 
 
 CREATE OR REPLACE FUNCTION fn_reserve_ticket()
-RETURNS TRIGGER AS
-$$
+RETURNS TRIGGER AS $$
 DECLARE 
     v_available INTEGER;
     v_status VARCHAR(20);
 BEGIN 
-    SELECT QUANTITY_AVAILABLE, STATUS INTO v_available,v_status
+    SELECT QUANTITY_AVAILABLE, STATUS INTO v_available, v_status
     FROM TICKET_TYPE
-    WHERE TYPE_ID=NEW.TYPE_ID
+    WHERE TYPE_ID = NEW.TICKET_TYPE_ID   -- was NEW.TYPE_ID
     FOR UPDATE;
 
     IF NOT FOUND THEN 
-    RAISE EXCEPTION 'Ticket type % does not exist',NEW.TICKET_TYPE_ID;
+        RAISE EXCEPTION 'Ticket type % does not exist', NEW.TICKET_TYPE_ID;
     END IF;
     IF v_status <> 'active' THEN 
-    RAISE EXCEPTION 'Ticket type % is not on sale', NEW.TICKET_TYPE_ID;
+        RAISE EXCEPTION 'Ticket type % is not on sale', NEW.TICKET_TYPE_ID;
     END IF;
-    IF v_available<=0 THEN 
-    RAISE EXCEPTION 'Sorry, Tickets are sold out!!';
+    IF v_available <= 0 THEN 
+        RAISE EXCEPTION 'Sorry, Tickets are sold out!!';
     END IF;
 
     UPDATE TICKET_TYPE
-    SET QUANTITY_AVAILABLE=QUANTITY_AVAILABLE-1
-    WHERE TYPE_ID=NEW.TYPE_ID;
+    SET QUANTITY_AVAILABLE = QUANTITY_AVAILABLE - 1
+    WHERE TYPE_ID = NEW.TICKET_TYPE_ID;  -- was NEW.TYPE_ID
     RETURN NEW;
-    END;
+END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_reserve_ticket
-BEFORE INSERT ON TICKETS
-FOR EACH ROW 
-EXECUTE FUNCTION fn_reserve_ticket();
-
-
-
 CREATE OR REPLACE FUNCTION fn_release_ticket()
-RETURNS TRIGGER AS
-$$
+RETURNS TRIGGER AS $$
 BEGIN 
-UPDATE TICKET_TYPE
-SET QUANTITY_AVAILABLE=QUANTITY_AVAILABLE+1
-WHERE TYPE_ID=OLD.TYPE_ID;
-RETURN OLD;
+    UPDATE TICKET_TYPE
+    SET QUANTITY_AVAILABLE = QUANTITY_AVAILABLE + 1
+    WHERE TYPE_ID = OLD.TICKET_TYPE_ID;  -- was OLD.TYPE_ID
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -158,11 +149,11 @@ DECLARE
     v_type VARCHAR(20);
     v_current_balance NUMERIC(10,2);
 BEGIN 
-    v_type := NEW.type;
-  
-    IF v_type NOT IN ('DEPOSIT', 'PAYMENT', 'REFUND') THEN
-    RAISE EXCEPTION 'Invalid wallet transaction type: %', NEW.TYPE;
-  END IF;
+   v_type := LOWER(NEW.TYPE);
+
+  IF v_type NOT IN ('deposit', 'payment', 'refund') THEN
+      RAISE EXCEPTION 'Invalid wallet transaction type: %', NEW.TYPE;
+END IF;
 
   IF NEW.AMOUNT <= 0 THEN
     RAISE EXCEPTION 'Wallet transaction amount must be positive (got %)', NEW.AMOUNT;
@@ -176,7 +167,7 @@ IF NOT FOUND THEN
     RAISE EXCEPTION 'Wallet % does not exist', NEW.WALLET_ID;
 END IF;
 
-  IF v_type = 'PAYMENT' THEN
+  IF v_type = 'payment' THEN
     IF v_current_balance < NEW.AMOUNT THEN
       RAISE EXCEPTION 'Insufficient balance in wallet % (balance: %, required: %)',
         NEW.WALLET_ID, v_current_balance, NEW.AMOUNT;

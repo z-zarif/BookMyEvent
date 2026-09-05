@@ -1,4 +1,6 @@
-import jwt from  'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import pool from '../db/db.js';
+
 
 
 export const verifyToken = (req, res, next) => {
