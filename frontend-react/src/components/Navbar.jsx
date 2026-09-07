@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-  const { isLoggedIn, logoutUser } = useAuth();
+  const { isLoggedIn, isOrganizer, logoutUser } = useAuth();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -22,6 +22,11 @@ export default function Navbar() {
             <Link to="/wishlist" className="hover:text-[#F5F3FF] transition-colors">Wishlist</Link>
             <Link to="/my-bookings" className="hover:text-[#F5F3FF] transition-colors">My Bookings</Link>
             <Link to="/wallet" className="hover:text-[#F5F3FF] transition-colors">Wallet</Link>
+            {isOrganizer ? (
+              <Link to="/organizer/dashboard" className="hover:text-[#F5F3FF] transition-colors">Dashboard</Link>
+            ) : (
+              <Link to="/become-organizer" className="hover:text-[#F5F3FF] transition-colors">Become an Organizer</Link>
+            )}
             <button
               onClick={handleLogout}
               className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors"

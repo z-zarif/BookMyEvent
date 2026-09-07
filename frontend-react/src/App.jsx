@@ -12,11 +12,14 @@ import MyBookings from './pages/MyBookings';
 import BookingDetails from './pages/BookingDetails';
 import Wallet from './pages/Wallet';
 import Wishlist from './pages/Wishlist';
+import BecomeOrganizer from './pages/BecomeOrganizer';
+import OrganizerDashboard from './pages/OrganizerDashboard';
+import CreateEvent from './pages/CreateEvent';
 
 export default function App() {
   const location = useLocation();
-  // Landing has its own minimal header, so skip the shared Navbar there
-  const hideNavbar = ['/', '/login', '/register'].includes(location.pathname);
+  // Landing/Login/Register/BecomeOrganizer have their own minimal headers
+  const hideNavbar = ['/', '/login', '/register', '/become-organizer'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,6 +37,11 @@ export default function App() {
         <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
         <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+
+        {/* Organizer routes */}
+        <Route path="/become-organizer" element={<ProtectedRoute><BecomeOrganizer /></ProtectedRoute>} />
+        <Route path="/organizer/dashboard" element={<ProtectedRoute><OrganizerDashboard /></ProtectedRoute>} />
+        <Route path="/organizer/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
       </Routes>
     </div>
   );

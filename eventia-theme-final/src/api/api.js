@@ -42,12 +42,6 @@ export const getEvent = (id) => client.get(`/events/${id}`);
 // array in the same request: { title, date_time, venue, description, ticketTypes: [{category, quantity, price}] }
 export const createEvent = (payload) => client.post('/events/postevent', payload);
 
-// ---- Organizers ----
-export const registerOrganizer = (companyName, bio) =>
-  client.post('/organizers/register', { companyName, bio });
-export const getMyOrganizerProfile = () => client.get('/organizers/me');
-export const getMyOrganizerEvents = () => client.get('/organizers/my-events');
-
 // ---- Bookings ----
 // Matches the real backend contract: body is { typeId, qty, promoCode },
 // NOT { eventId, ticketTypeId, quantity, paymentMethod } as originally assumed.
