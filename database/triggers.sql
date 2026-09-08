@@ -128,6 +128,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_sync_booking_total();
 
 
+--!
 CREATE OR REPLACE FUNCTION fn_wallet_guard_balance()
 RETURNS TRIGGER AS $$
 BEGIN
