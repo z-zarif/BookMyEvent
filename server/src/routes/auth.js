@@ -31,17 +31,26 @@ router.post("/register/user", async (req, res) => {
       [userName, email, passwordHash, gender],
       // The parameter array, Supplies values for the SQL placeholders, using null when gender is not provided.
     );
-    await client.query("COMMIT");
-    //"Everything in this transaction succeeded. Save the changes permanently."
-    // Commits the transaction and permanently saves the new user.
     const user = result.rows[0];
     // Gets the newly inserted user's data from the first returned database row.
+
+    // Every user needs a wallet before they can book anything. WALLETS.BALANCE
+    // defaults to 10000, but only once a row actually exists - so we create
+    // it here, in the same transaction as the user, right after signup.
+    await client.query(
+      `INSERT INTO WALLETS (WALLET_ID, USER_ID)
+            VALUES (fn_generate_id('WAL'), $1)`,
+      [user.user_id],
+    );
+
+    await client.query("COMMIT");
+    //"Everything in this transaction succeeded. Save the changes permanently."
+    // Commits the transaction and permanently saves the new user and their wallet.
 
     const token = jwt.sign(
       { user_id: user.user_id, role: "user" },
       // Stores the user's ID and role inside the JWT payload.
       process.env.JWT_SECRET,
-      // Gets the secret key used to sign and verify JWT tokens.
       { expiresIn: "7d" },
     );
     // Creates a signed JWT token for authenticating the user.
@@ -83,10 +92,21 @@ router.post("/login/user", async (req, res) => {
         error: "Incorrect Password. Please try again",
       });
     }
+
+    // Check whether this user is already an organizer, so the JWT role
+    // reflects their real status instead of always saying "user". Without
+    // this, logging back out and in would forget they became an organizer,
+    // and the frontend would wrongly show "Become an Organizer" again.
+    const organizerCheck = await pool.query(
+      `SELECT ORGANIZER_ID FROM ORGANIZERS WHERE ORGANIZER_ID = $1`,
+      [user.user_id],
+    );
+    const role = organizerCheck.rows.length > 0 ? "organizer" : "user";
+
     const token = jwt.sign(
       {
         user_id: user.user_id,
-        role: "user",
+        role,
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
@@ -102,20 +122,11 @@ router.post("/login/user", async (req, res) => {
   }
 });
 
+// NOTE: the /logout route that was here has been removed for now - it
+// referenced verifyToken without importing it, which crashed the whole
+// server on startup, and it also inserted into a TOKEN_BLACKLIST table
+// that doesn't exist in schema.sql yet. Re-add once both are in place:
+// import { verifyToken } from "../middleware/auth.js";
+// and a TOKEN_BLACKLIST table with (TOKEN, EXPIRES_AT) columns.
 
-router.post('/logout', verifyToken, async (req, res) => {
-  try {
-    const decoded = jwt.decode(req.token);
-    const expiresAt = new Date(decoded.exp * 1000);
-
-    await pool.query(
-      'INSERT INTO TOKEN_BLACKLIST (TOKEN, EXPIRES_AT) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [req.token, expiresAt]
-    );
-    res.status(200).json({ message: 'Logged out successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Logout failed' });
-  }
-});
 export default router;

@@ -25,6 +25,41 @@ router.get("/getevents", async (req, res) => {
   }
 });
 
+// GET /events/:id - a single event plus its active ticket types.
+// Needed by the event details page so users can actually see prices
+// and get a TYPE_ID to book against.
+router.get("/:id", async (req, res) => {
+  try {
+    const eventResult = await pool.query(
+      `SELECT E.EVENT_ID, E.TITLE, E.EVENT_DATE_TIME, E.VENUE, E.DESCRIBE_EVENT, E.STATUS, U.USER_NAME
+       FROM EVENTS E
+       JOIN ORGANIZERS O ON E.ORGANIZER_ID = O.ORGANIZER_ID
+       JOIN USERS U ON O.ORGANIZER_ID = U.USER_ID
+       WHERE E.EVENT_ID = $1`,
+      [req.params.id],
+    );
+
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    const ticketTypesResult = await pool.query(
+      `SELECT TYPE_ID, CATEGORY, QUANTITY_AVAILABLE, STATUS, PRICE
+       FROM TICKET_TYPE
+       WHERE EVENT_ID = $1 AND STATUS = 'active'`,
+      [req.params.id],
+    );
+
+    res.json({
+      event: eventResult.rows[0],
+      ticketTypes: ticketTypesResult.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not load event" });
+  }
+});
+
 router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
   const { title, date_time, venue, description, ticketTypes } = req.body;
  
