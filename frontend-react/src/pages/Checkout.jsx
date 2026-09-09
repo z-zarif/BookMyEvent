@@ -21,7 +21,6 @@ export default function Checkout() {
     setSuccess('');
     setSubmitting(true);
     try {
-      // Backend contract: { typeId, qty, promoCode } - matches bookings.js exactly
       const result = await createBooking({
         typeId,
         qty,
@@ -39,23 +38,12 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative flex items-center justify-center px-6 py-12 overflow-hidden">
-      <div className="grain-overlay" />
-
-      <div className="relative z-10 w-full max-w-sm">
-        <div className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden">
-          <div
-            className="px-7 py-5"
-            style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
-          >
-            <p className="text-xs uppercase tracking-wide text-white/80">{category || 'Ticket'}</p>
-            <h2 className="font-['Anton'] text-2xl tracking-tight text-white">Checkout</h2>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-            <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-            <div className="border-t border-dashed border-[#262636] mx-6" />
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-sm">
+        <div className="bg-[#14141F] border border-[#262636] rounded-xl overflow-hidden">
+          <div className="px-7 py-5 border-b border-[#262636]">
+            <p className="text-xs uppercase tracking-wide text-[#9C97B8]">{category || 'Ticket'}</p>
+            <h2 className="font-['Anton'] text-2xl tracking-tight">Checkout</h2>
           </div>
 
           <div className="px-7 py-6 space-y-4">
@@ -106,8 +94,7 @@ export default function Checkout() {
             <button
               onClick={handleConfirm}
               disabled={submitting}
-              className="w-full text-white font-semibold rounded-lg py-3 mt-2 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
-              style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+              className="w-full bg-[#7C3AED] text-white font-semibold rounded-lg py-3 mt-2 hover:bg-[#6D2FE0] transition-colors disabled:opacity-50"
             >
               {submitting ? 'Processing...' : 'Confirm Booking'}
             </button>

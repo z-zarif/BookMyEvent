@@ -10,22 +10,9 @@ const TICKER_ITEMS = [
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] flex flex-col relative overflow-hidden">
-      {/* Grain texture over everything, purely additive */}
-      <div className="grain-overlay" />
-
-      {/* Stage-light glow behind the wordmark */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full opacity-30 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #7C3AED 0%, #FF3D77 45%, transparent 70%)' }}
-      />
-
-      {/* Top bar */}
-      <header className="relative z-10 flex justify-end items-center gap-3 px-8 py-6">
-        <Link
-          to="/login"
-          className="text-sm text-[#F5F3FF]/80 hover:text-white transition-colors px-2"
-        >
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] flex flex-col">
+      <header className="flex justify-end items-center gap-3 px-8 py-6">
+        <Link to="/login" className="text-sm text-[#F5F3FF]/70 hover:text-white transition-colors px-2">
           Login
         </Link>
         <Link
@@ -36,8 +23,7 @@ export default function Landing() {
         </Link>
       </header>
 
-      {/* Hero */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
         <span className="text-xs tracking-wide text-[#9C97B8] mb-4">
           Live shows. Real seats. No refresh-and-pray.
         </span>
@@ -53,33 +39,39 @@ export default function Landing() {
         <div className="mt-10 flex items-center gap-4 flex-wrap justify-center">
           <Link
             to="/register"
-            className="text-sm font-semibold px-8 py-3.5 rounded-full text-white transition-transform hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+            className="text-sm font-semibold px-8 py-3.5 rounded-full bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
           >
             Get your ticket
           </Link>
           <Link
             to="/events"
-            className="text-sm text-[#F5F3FF]/80 hover:text-white transition-colors underline underline-offset-4 decoration-[#9C97B8]/40"
+            className="text-sm text-[#F5F3FF]/70 hover:text-white transition-colors underline underline-offset-4 decoration-[#9C97B8]/40"
           >
             Browse what's on
           </Link>
         </div>
+
+        <div className="mt-20 flex items-center gap-6 text-sm text-[#9C97B8] flex-wrap justify-center">
+          <span>Instant booking</span>
+          <span className="w-px h-4 bg-[#262636]" />
+          <span>Wallet payments</span>
+          <span className="w-px h-4 bg-[#262636]" />
+          <span>No hidden fees</span>
+        </div>
       </main>
 
-      {/* Marquee ticker — scrolling venue-style reel of upcoming shows */}
-      <div className="relative z-10 border-t border-[#262636] py-4 overflow-hidden">
+      <div className="border-t border-[#262636] py-4 overflow-hidden">
         <div className="flex whitespace-nowrap marquee-track">
           {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
             <span key={i} className="mx-6 text-sm text-[#9C97B8] flex items-center gap-6">
               {item}
-              <span className="text-[#FF3D77]">●</span>
+              <span className="text-[#7C3AED]">●</span>
             </span>
           ))}
         </div>
       </div>
 
-      <footer className="relative z-10 text-center text-xs text-[#9C97B8]/70 py-5">
+      <footer className="text-center text-xs text-[#9C97B8]/60 py-5">
         © {new Date().getFullYear()} Eventia
       </footer>
     </div>

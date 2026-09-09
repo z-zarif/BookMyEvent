@@ -35,10 +35,8 @@ export default function EventDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
-      <div className="grain-overlay" />
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-10">
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
+      <div className="max-w-4xl mx-auto px-6 py-10">
         <Link to="/events" className="text-sm text-[#9C97B8] hover:text-white transition-colors">
           ← Back to shows
         </Link>
@@ -63,7 +61,7 @@ export default function EventDetails() {
 
               <button
                 onClick={handleWishlist}
-                className="mt-5 text-sm font-semibold px-5 py-2.5 rounded-full border border-[#7C3AED]/60 text-[#F5F3FF] hover:bg-[#7C3AED]/10 transition-colors"
+                className="mt-5 text-sm font-semibold px-5 py-2.5 rounded-full border border-[#262636] text-[#F5F3FF] hover:border-[#7C3AED] transition-colors"
               >
                 + Add to Wishlist
               </button>
@@ -79,21 +77,12 @@ export default function EventDetails() {
               {ticketTypes.map((tt) => (
                 <div
                   key={tt.type_id}
-                  className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden group hover:border-[#7C3AED]/60 transition-colors"
+                  className="bg-[#14141F] border border-[#262636] rounded-xl overflow-hidden hover:border-[#7C3AED]/50 transition-colors"
                 >
-                  <div
-                    className="px-5 py-3"
-                    style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
-                  >
-                    <span className="text-xs uppercase tracking-wide text-white/80">
+                  <div className="px-5 py-4 border-b border-[#262636]">
+                    <span className="text-xs uppercase tracking-wide text-[#9C97B8]">
                       {tt.category}
                     </span>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-                    <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-                    <div className="border-t border-dashed border-[#262636] mx-5" />
                   </div>
 
                   <div className="px-5 py-5">
@@ -102,8 +91,7 @@ export default function EventDetails() {
 
                     <Link
                       to={`/checkout?typeId=${tt.type_id}&price=${tt.price}&category=${tt.category}`}
-                      className="inline-block w-full text-center text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-transform group-hover:scale-[1.02]"
-                      style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+                      className="inline-block w-full text-center text-sm font-semibold px-4 py-2.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
                     >
                       Book
                     </Link>

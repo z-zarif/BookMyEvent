@@ -27,10 +27,7 @@ export default function Navbar() {
             ) : (
               <Link to="/become-organizer" className="hover:text-[#F5F3FF] transition-colors">Become an Organizer</Link>
             )}
-            <button
-              onClick={handleLogout}
-              className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors"
-            >
+            <button onClick={handleLogout} className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors">
               Logout
             </button>
           </>
@@ -39,8 +36,7 @@ export default function Navbar() {
             <Link to="/login" className="hover:text-[#F5F3FF] transition-colors">Login</Link>
             <Link
               to="/register"
-              className="font-semibold px-4 py-1.5 rounded-full text-white"
-              style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+              className="font-semibold px-4 py-1.5 rounded-full bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
             >
               Sign up
             </Link>

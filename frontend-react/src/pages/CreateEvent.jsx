@@ -57,8 +57,7 @@ export default function CreateEvent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
-      <div className="grain-overlay" />
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-10">
         <Link to="/organizer/dashboard" className="text-sm text-[#9C97B8] hover:text-white transition-colors">
@@ -74,7 +73,7 @@ export default function CreateEvent() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-[#14141F] border border-[#262636] rounded-2xl px-6 py-6 space-y-4">
+          <div className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-6 space-y-4">
             <h2 className="font-['Anton'] text-lg tracking-tight mb-2">SHOW DETAILS</h2>
 
             <div>
@@ -123,7 +122,7 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          <div className="bg-[#14141F] border border-[#262636] rounded-2xl px-6 py-6 space-y-4">
+          <div className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-['Anton'] text-lg tracking-tight">TICKET TYPES</h2>
               <button
@@ -188,8 +187,8 @@ export default function CreateEvent() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full text-white font-semibold rounded-lg py-3.5 transition-transform hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
-            style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+            className="w-full text-white font-semibold rounded-lg py-3.5 transition-colors hover:brightness-110 disabled:opacity-50 disabled:hover:brightness-100"
+            style={{ background: '#5B4FE0' }}
           >
             {submitting ? 'Creating...' : 'Publish Show'}
           </button>

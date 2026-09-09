@@ -25,10 +25,8 @@ export default function MyBookings() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
-      <div className="grain-overlay" />
-
-      <div className="relative z-10 max-w-3xl mx-auto px-6 py-10">
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
+      <div className="max-w-3xl mx-auto px-6 py-10">
         <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">Your stubs</p>
         <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-8">MY BOOKINGS</h1>
 
@@ -48,36 +46,28 @@ export default function MyBookings() {
           </p>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {bookings.map((b) => (
             <div
               key={b.booking_id}
-              className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden flex flex-col sm:flex-row"
+              className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-[#7C3AED]/50 transition-colors"
             >
-              {/* Stub side strip */}
-              <div
-                className="sm:w-2.5 h-1.5 sm:h-auto"
-                style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
-              />
+              <div>
+                <span className="inline-block text-xs uppercase tracking-wide text-[#9C97B8] px-2.5 py-1 rounded-full border border-[#262636] mb-2">
+                  {STATUS_LABEL[b.bk_status] || b.bk_status}
+                </span>
+                <h3 className="font-['Anton'] text-xl tracking-tight">{b.event_title}</h3>
+                <p className="text-[#9C97B8] text-sm">{formatDate(b.event_date_time)}</p>
+              </div>
 
-              <div className="flex-1 px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <span className="inline-block text-xs uppercase tracking-wide text-[#F5F3FF] px-2.5 py-1 rounded-full bg-[#262636] mb-2">
-                    {STATUS_LABEL[b.bk_status] || b.bk_status}
-                  </span>
-                  <h3 className="font-['Anton'] text-xl tracking-tight">{b.event_title}</h3>
-                  <p className="text-[#9C97B8] text-sm">{formatDate(b.event_date_time)}</p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <p className="text-lg font-semibold whitespace-nowrap">₹{b.total_cost}</p>
-                  <Link
-                    to={`/bookings/${b.booking_id}`}
-                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#7C3AED]/60 text-[#F5F3FF] hover:bg-[#7C3AED]/10 transition-colors whitespace-nowrap"
-                  >
-                    View Tickets
-                  </Link>
-                </div>
+              <div className="flex items-center gap-4">
+                <p className="text-lg font-semibold whitespace-nowrap">₹{b.total_cost}</p>
+                <Link
+                  to={`/bookings/${b.booking_id}`}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#262636] text-[#F5F3FF] hover:border-[#7C3AED] transition-colors whitespace-nowrap"
+                >
+                  View Tickets
+                </Link>
               </div>
             </div>
           ))}

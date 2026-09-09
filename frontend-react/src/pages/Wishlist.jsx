@@ -28,10 +28,8 @@ export default function Wishlist() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
-      <div className="grain-overlay" />
-
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-10">
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
+      <div className="max-w-5xl mx-auto px-6 py-10">
         <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">Saved for later</p>
         <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-8">MY WISHLIST</h1>
 
@@ -55,19 +53,10 @@ export default function Wishlist() {
           {items.map((ev) => (
             <div
               key={ev.event_id}
-              className="bg-[#14141F] border border-[#262636] rounded-2xl overflow-hidden group hover:border-[#7C3AED]/60 transition-colors"
+              className="bg-[#14141F] border border-[#262636] rounded-xl overflow-hidden hover:border-[#7C3AED]/50 transition-colors"
             >
-              <div
-                className="px-5 py-3"
-                style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
-              >
-                <span className="text-xs uppercase tracking-wide text-white/80">Saved</span>
-              </div>
-
-              <div className="relative">
-                <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-                <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#0B0B14]" />
-                <div className="border-t border-dashed border-[#262636] mx-5" />
+              <div className="px-5 py-4 border-b border-[#262636]">
+                <span className="text-xs uppercase tracking-wide text-[#9C97B8]">Saved</span>
               </div>
 
               <div className="px-5 py-5">
@@ -78,8 +67,7 @@ export default function Wishlist() {
                 <div className="flex gap-2">
                   <Link
                     to={`/events/${ev.event_id}`}
-                    className="flex-1 text-center text-sm font-semibold px-3 py-2 rounded-lg text-white transition-transform group-hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+                    className="flex-1 text-center text-sm font-semibold px-3 py-2 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
                   >
                     View
                   </Link>

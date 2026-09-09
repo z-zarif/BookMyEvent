@@ -47,10 +47,8 @@ export default function Wallet() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope'] relative overflow-hidden">
-      <div className="grain-overlay" />
-
-      <div className="relative z-10 max-w-3xl mx-auto px-6 py-10">
+    <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
+      <div className="max-w-3xl mx-auto px-6 py-10">
         <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">Show me the money</p>
         <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-8">MY WALLET</h1>
 
@@ -65,19 +63,14 @@ export default function Wallet() {
           </p>
         )}
 
-        {/* Balance hero card */}
-        <div
-          className="rounded-2xl px-7 py-6 mb-8"
-          style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
-        >
-          <p className="text-xs uppercase tracking-wide text-white/70 mb-1">Current Balance</p>
-          <p className="font-['Anton'] text-5xl text-white tracking-tight">
+        <div className="bg-[#14141F] border border-[#262636] rounded-xl px-7 py-6 mb-8">
+          <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-1">Current Balance</p>
+          <p className="font-['Anton'] text-5xl tracking-tight">
             {wallet ? `₹${wallet.balance}` : '...'}
           </p>
         </div>
 
-        {/* Add money card */}
-        <div className="bg-[#14141F] border border-[#262636] rounded-2xl px-6 py-5 mb-10 max-w-sm">
+        <div className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-5 mb-10 max-w-sm">
           <h3 className="font-['Anton'] text-lg tracking-tight mb-3">TOP UP</h3>
           <input
             type="number"
@@ -89,15 +82,13 @@ export default function Wallet() {
           />
           <button
             onClick={handleAddMoney}
-            className="w-full text-white font-semibold rounded-lg py-2.5 transition-transform hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg, #FF3D77, #7C3AED)' }}
+            className="w-full bg-[#7C3AED] text-white font-semibold rounded-lg py-2.5 hover:bg-[#6D2FE0] transition-colors"
           >
             Submit Request
           </button>
           <p className="text-[#9C97B8] text-xs mt-2">Needs approval before it lands in your balance.</p>
         </div>
 
-        {/* Transaction history */}
         <h2 className="font-['Anton'] text-2xl tracking-tight mb-4">TRANSACTION HISTORY</h2>
         {transactions.length === 0 && <p className="text-[#9C97B8]">No transactions yet.</p>}
 
@@ -105,22 +96,20 @@ export default function Wallet() {
           {transactions.map((t) => (
             <div
               key={t.transaction_id}
-              className="bg-[#14141F] border border-[#262636] rounded-xl px-5 py-4 flex items-center justify-between"
+              className="bg-[#14141F] border border-[#262636] rounded-lg px-5 py-4 flex items-center justify-between"
             >
               <div>
-                <span className="inline-block text-xs uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#262636] mb-1">
+                <span className="inline-block text-xs uppercase tracking-wide px-2 py-0.5 rounded-full border border-[#262636] mb-1">
                   {TYPE_LABEL[t.type] || t.type}
                 </span>
                 <p className="text-[#9C97B8] text-sm">{t.reason}</p>
-                <p className="text-[#9C97B8]/70 text-xs">{formatDate(t.happened_at)}</p>
+                <p className="text-[#9C97B8]/60 text-xs">{formatDate(t.happened_at)}</p>
               </div>
               <div className="text-right">
-                <p
-                  className={`font-semibold ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}
-                >
+                <p className={`font-semibold ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
                   {t.type === 'payment' ? '-' : '+'}₹{t.amount}
                 </p>
-                <p className="text-[#9C97B8]/70 text-xs">Balance: ₹{t.balance_after}</p>
+                <p className="text-[#9C97B8]/60 text-xs">Balance: ₹{t.balance_after}</p>
               </div>
             </div>
           ))}
