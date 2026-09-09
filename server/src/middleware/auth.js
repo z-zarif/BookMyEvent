@@ -3,32 +3,28 @@ import pool from '../db/db.js';
 
 
 
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+export const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
 
-  // 1. check authHeader exists and starts with "Bearer "
-  //    if not → 401
-    if (!authHeader ||!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-        error: "Authorization token required",
-    });
+  try {
+    const blacklisted = await pool.query(
+      'SELECT 1 FROM TOKEN_BLACKLIST WHERE TOKEN = $1',
+      [token]
+    );
+    if (blacklisted.rows.length > 0) {
+      return res.status(401).json({ error: 'Token has been logged out' });
     }
 
-  // 2. extract the token string (strip "Bearer ")
-  const token=authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token,process.env.JWT_SECRET);
-    req.user= decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    req.token = token; // logout route needs the raw token
     next();
-    // 3. try jwt.verify(token, process.env.JWT_SECRET)
-    //    - on success: attach decoded payload to req.user, call next()
-    //    - on failure (catch block): 401
- } catch (err) {
-  return res.status(401).json({ error: "Invalid or Expired Token" });
-}
-
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
 };
-
 
 export const requireOrganizer = async (req, res, next) => {
   try {
@@ -47,3 +43,4 @@ export const requireOrganizer = async (req, res, next) => {
     res.status(500).json({ error: "Authorization check failed" });
   }
 };
+

@@ -312,4 +312,25 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
+  const { bookingId } = req.params;
+  const userId = req.user.userId; // ⚠️ confirm this matches your JWT sign payload key
+
+  try {
+    await pool.query("CALL cancel_booking($1, $2)", [bookingId, userId]);
+    res.status(200).json({ message: "Booking cancelled successfully" });
+  } catch (err) {
+    console.error(err);
+    switch (err.code) {
+      case "BK404":
+        return res.status(404).json({ error: err.message });
+      case "BK403":
+        return res.status(403).json({ error: err.message });
+      case "BK409":
+        return res.status(409).json({ error: err.message });
+      default:
+        return res.status(500).json({ error: "Failed to cancel booking" });
+    }
+  }
+});
 export default router;

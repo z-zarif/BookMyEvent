@@ -69,4 +69,28 @@ router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
     client.release();
   }
 });
+
+router.post('/:eventId/cancel', verifyToken, requireOrganizer, async (req, res) => {
+  const { eventId } = req.params;
+  const organizerId = req.user.userId; // ⚠️ same key-name check as before — confirm against your JWT payload
+
+  try {
+    await pool.query('CALL cancel_event($1, $2)', [eventId, organizerId]);
+    res.status(200).json({ message: 'Event cancelled successfully' });
+  } catch (err) {
+    console.error(err);
+    switch (err.code) {
+      case 'EV404': return res.status(404).json({ error: err.message });
+      case 'EV403': return res.status(403).json({ error: err.message });
+      case 'EV409': return res.status(409).json({ error: err.message });
+      case 'BK404':
+      case 'BK403':
+      case 'BK409':
+        // bubbled up from cancel_booking inside the loop
+        return res.status(409).json({ error: `Failed while cancelling a booking: ${err.message}` });
+      default:
+        return res.status(500).json({ error: 'Failed to cancel event' });
+    }
+  }
+});
 export default router;

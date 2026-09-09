@@ -101,4 +101,21 @@ router.post("/login/user", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
+router.post('/logout', verifyToken, async (req, res) => {
+  try {
+    const decoded = jwt.decode(req.token);
+    const expiresAt = new Date(decoded.exp * 1000);
+
+    await pool.query(
+      'INSERT INTO TOKEN_BLACKLIST (TOKEN, EXPIRES_AT) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [req.token, expiresAt]
+    );
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Logout failed' });
+  }
+});
 export default router;
