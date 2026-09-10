@@ -71,7 +71,7 @@ DECLARE
 BEGIN 
     SELECT QUANTITY_AVAILABLE, STATUS INTO v_available, v_status
     FROM TICKET_TYPE
-    WHERE TYPE_ID = NEW.TICKET_TYPE_ID   -- was NEW.TYPE_ID
+    WHERE TYPE_ID = NEW.TICKET_TYPE_ID
     FOR UPDATE;
 
     IF NOT FOUND THEN 
@@ -86,17 +86,24 @@ BEGIN
 
     UPDATE TICKET_TYPE
     SET QUANTITY_AVAILABLE = QUANTITY_AVAILABLE - 1
-    WHERE TYPE_ID = NEW.TICKET_TYPE_ID;  -- was NEW.TYPE_ID
+    WHERE TYPE_ID = NEW.TICKET_TYPE_ID;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+CREATE TRIGGER trg_reserve_ticket
+BEFORE INSERT ON TICKETS
+FOR EACH ROW
+EXECUTE FUNCTION fn_reserve_ticket();
 
 CREATE OR REPLACE FUNCTION fn_release_ticket()
 RETURNS TRIGGER AS $$
 BEGIN 
     UPDATE TICKET_TYPE
     SET QUANTITY_AVAILABLE = QUANTITY_AVAILABLE + 1
-    WHERE TYPE_ID = OLD.TICKET_TYPE_ID;  -- was OLD.TYPE_ID
+    WHERE TYPE_ID = OLD.TICKET_TYPE_ID;
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -154,19 +161,19 @@ BEGIN
 
   IF v_type NOT IN ('deposit', 'payment', 'refund') THEN
       RAISE EXCEPTION 'Invalid wallet transaction type: %', NEW.TYPE;
-END IF;
+  END IF;
 
   IF NEW.AMOUNT <= 0 THEN
     RAISE EXCEPTION 'Wallet transaction amount must be positive (got %)', NEW.AMOUNT;
   END IF;
 
-SELECT BALANCE INTO v_current_balance 
-FROM WALLETS 
-WHERE WALLET_ID=NEW.WALLET_ID
-FOR UPDATE;
-IF NOT FOUND THEN
+  SELECT BALANCE INTO v_current_balance 
+  FROM WALLETS 
+  WHERE WALLET_ID = NEW.WALLET_ID
+  FOR UPDATE;
+  IF NOT FOUND THEN
     RAISE EXCEPTION 'Wallet % does not exist', NEW.WALLET_ID;
-END IF;
+  END IF;
 
   IF v_type = 'payment' THEN
     IF v_current_balance < NEW.AMOUNT THEN
@@ -178,7 +185,7 @@ END IF;
     v_current_balance := v_current_balance + NEW.AMOUNT;
   END IF;
 
-    NEW.BALANCE_AFTER := v_current_balance;
+  NEW.BALANCE_AFTER := v_current_balance;
 
   UPDATE WALLETS
   SET BALANCE = v_current_balance,
@@ -188,7 +195,6 @@ END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 
 CREATE TRIGGER trg_wallet_transactions_apply
 BEFORE INSERT ON WALLET_TRANSACTIONS
