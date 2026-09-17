@@ -312,9 +312,83 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
+// GET /bookings/mine
+// Lists the logged-in user's bookings, newest first, with the event title
+// so the bookings page doesn't need a second request per booking.
+router.get("/mine", verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+         B.BOOKING_ID,
+         B.BOOKING_TIME,
+         B.BK_STATUS,
+         B.TOTAL_COST,
+         E.TITLE AS EVENT_TITLE,
+         E.EVENT_DATE_TIME,
+         E.VENUE
+       FROM BOOKINGS B
+       JOIN EVENTS E ON E.EVENT_ID = B.EVENT_ID
+       WHERE B.USER_ID = $1
+       ORDER BY B.BOOKING_TIME DESC`,
+      [req.user.user_id],
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not fetch your bookings" });
+  }
+});
+
+// GET /bookings/:id
+// One booking plus its individual tickets. Scoped to the logged-in user so
+// nobody can read someone else's booking by guessing an ID.
+router.get("/:id", verifyToken, async (req, res) => {
+  try {
+    const bookingResult = await pool.query(
+      `SELECT
+         B.BOOKING_ID,
+         B.BOOKING_TIME,
+         B.BK_STATUS,
+         B.TOTAL_COST,
+         E.TITLE AS EVENT_TITLE,
+         E.EVENT_DATE_TIME,
+         E.VENUE
+       FROM BOOKINGS B
+       JOIN EVENTS E ON E.EVENT_ID = B.EVENT_ID
+       WHERE B.BOOKING_ID = $1 AND B.USER_ID = $2`,
+      [req.params.id, req.user.user_id],
+    );
+
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    const ticketsResult = await pool.query(
+      `SELECT
+         T.TICKET_ID,
+         T.SEAT_NUMBER,
+         T.PRICE_PAID,
+         TT.CATEGORY
+       FROM TICKETS T
+       JOIN TICKET_TYPE TT ON TT.TYPE_ID = T.TICKET_TYPE_ID
+       WHERE T.BOOKING_ID = $1`,
+      [req.params.id],
+    );
+
+    res.json({
+      booking: bookingResult.rows[0],
+      tickets: ticketsResult.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not fetch booking" });
+  }
+});
+
 router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
   const { bookingId } = req.params;
-  const userId = req.user.userId; // ⚠️ confirm this matches your JWT sign payload key
+  const userId = req.user.user_id;
 
   try {
     await pool.query("CALL cancel_booking($1, $2)", [bookingId, userId]);
