@@ -30,17 +30,12 @@ export const login = (email, password) =>
   client.post('/auth/login/user', { email, password });
 
 // ---- Events ----
-// Backend route is /events/getevents, not /events. Returns organizer's
-// user_name alongside each event now (no ticket_type/price data in this list).
 export const getEvents = () => client.get('/events/getevents');
-
-// NOTE: backend has no GET /events/:id route yet. This will 404 until your
-// friend adds one. Keeping this here so EventDetails.jsx just works once it exists.
 export const getEvent = (id) => client.get(`/events/${id}`);
 
-// Backend route is /events/postevent, and now expects ticketTypes as an
-// array in the same request: { title, date_time, venue, description, ticketTypes: [{category, quantity, price}] }
+// Expects { title, date_time, venue, description, ticketTypes: [{category, quantity, price}] }
 export const createEvent = (payload) => client.post('/events/postevent', payload);
+export const cancelEvent = (eventId) => client.post(`/events/${eventId}/cancel`);
 
 // ---- Organizers ----
 export const registerOrganizer = (companyName, bio) =>
@@ -49,20 +44,36 @@ export const getMyOrganizerProfile = () => client.get('/organizers/me');
 export const getMyOrganizerEvents = () => client.get('/organizers/my-events');
 
 // ---- Bookings ----
-// Matches the real backend contract: body is { typeId, qty, promoCode },
-// NOT { eventId, ticketTypeId, quantity, paymentMethod } as originally assumed.
+// Booking body is { typeId, qty, promoCode } - promoCode is optional and must
+// be left out entirely (not empty string) when the user didn't enter one.
 export const createBooking = (payload) => client.post('/bookings', payload);
 export const getMyBookings = () => client.get('/bookings/mine');
 export const getBooking = (id) => client.get(`/bookings/${id}`);
+export const cancelBooking = (bookingId) => client.post(`/bookings/${bookingId}/cancel`);
 
-// ---- Wallet (backend routes don't exist yet - these will 404 until built) ----
+// ---- Wallet ----
 export const getWallet = () => client.get('/wallet');
 export const requestAddMoney = (amount) => client.post('/wallet/add-money', { amount });
 export const getMyAddMoneyRequests = () => client.get('/wallet/add-money/mine');
 
-// ---- Wishlist (backend routes don't exist yet - these will 404 until built) ----
+// ---- Wishlist ----
 export const getWishlist = () => client.get('/wishlist');
 export const addToWishlist = (eventId) => client.post('/wishlist', { eventId });
 export const removeFromWishlist = (eventId) => client.delete(`/wishlist/${eventId}`);
+
+// ---- Admin ----
+// Admin access is controlled by the ADMIN_EMAILS list in the server's .env.
+// checkAdmin() succeeding means the logged-in user is an admin.
+export const checkAdmin = () => client.get('/admin/me');
+export const getAdminStats = () => client.get('/admin/stats');
+export const getAddMoneyRequests = (status) =>
+  client.get('/admin/add-money-requests', { params: status ? { status } : {} });
+export const approveAddMoneyRequest = (id) =>
+  client.post(`/admin/add-money-requests/${id}/approve`);
+export const rejectAddMoneyRequest = (id) =>
+  client.post(`/admin/add-money-requests/${id}/reject`);
+export const getAdminWallets = () => client.get('/admin/wallets');
+export const getAdminTransactions = () => client.get('/admin/transactions');
+export const getAuditLog = () => client.get('/admin/audit-log');
 
 export default client;

@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
-import { getWallet, requestAddMoney } from '../api/api';
+import { getWallet, requestAddMoney, getMyAddMoneyRequests } from '../api/api';
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  return iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 }
 
-const TYPE_LABEL = {
-  deposit: 'Deposit',
-  payment: 'Payment',
-  refund: 'Refund',
+const REQ_STATUS_STYLE = {
+  approved: 'text-[#4ADE80] border-[#4ADE80]/40',
+  pending: 'text-[#FACC15] border-[#FACC15]/40',
+  rejected: 'text-[#FF3D77] border-[#FF3D77]/40',
 };
 
 export default function Wallet() {
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [tab, setTab] = useState('transactions');
 
   function load() {
     getWallet()
@@ -25,6 +27,10 @@ export default function Wallet() {
         setTransactions(data.transactions);
       })
       .catch((err) => setError(err.message));
+
+    getMyAddMoneyRequests()
+      .then(setRequests)
+      .catch(() => {});
   }
 
   useEffect(load, []);
@@ -39,8 +45,9 @@ export default function Wallet() {
     }
     try {
       await requestAddMoney(value);
-      setSuccess('Request submitted — pending approval.');
+      setSuccess('Request submitted — an admin needs to approve it.');
       setAmount('');
+      load();
     } catch (err) {
       setError(err.message);
     }
@@ -49,7 +56,7 @@ export default function Wallet() {
   return (
     <div className="min-h-screen bg-[#0B0B14] text-[#F5F3FF] font-['Manrope']">
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">Show me the money</p>
+        <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-2">Your money</p>
         <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-8">MY WALLET</h1>
 
         {error && (
@@ -63,57 +70,117 @@ export default function Wallet() {
           </p>
         )}
 
-        <div className="bg-[#14141F] border border-[#262636] rounded-xl px-7 py-6 mb-8">
-          <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-1">Current Balance</p>
-          <p className="font-['Anton'] text-5xl tracking-tight">
-            {wallet ? `₹${wallet.balance}` : '...'}
-          </p>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
+          <div className="bg-[#14141F] border border-[#262636] rounded-xl px-7 py-6">
+            <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-1">Current Balance</p>
+            <p className="font-['Anton'] text-5xl tracking-tight">
+              {wallet ? `₹${wallet.balance}` : '...'}
+            </p>
+            {wallet?.last_used && (
+              <p className="text-[#9C97B8]/60 text-xs mt-2">
+                Last used {formatDate(wallet.last_used)}
+              </p>
+            )}
+          </div>
 
-        <div className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-5 mb-10 max-w-sm">
-          <h3 className="font-['Anton'] text-lg tracking-tight mb-3">TOP UP</h3>
-          <input
-            type="number"
-            min={1}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount"
-            className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors mb-3"
-          />
-          <button
-            onClick={handleAddMoney}
-            className="w-full bg-[#7C3AED] text-white font-semibold rounded-lg py-2.5 hover:bg-[#6D2FE0] transition-colors"
-          >
-            Submit Request
-          </button>
-          <p className="text-[#9C97B8] text-xs mt-2">Needs approval before it lands in your balance.</p>
-        </div>
-
-        <h2 className="font-['Anton'] text-2xl tracking-tight mb-4">TRANSACTION HISTORY</h2>
-        {transactions.length === 0 && <p className="text-[#9C97B8]">No transactions yet.</p>}
-
-        <div className="space-y-2">
-          {transactions.map((t) => (
-            <div
-              key={t.transaction_id}
-              className="bg-[#14141F] border border-[#262636] rounded-lg px-5 py-4 flex items-center justify-between"
+          <div className="bg-[#14141F] border border-[#262636] rounded-xl px-6 py-5">
+            <h3 className="font-['Anton'] text-lg tracking-tight mb-3">TOP UP</h3>
+            <input
+              type="number"
+              min={1}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors mb-3"
+            />
+            <button
+              onClick={handleAddMoney}
+              className="w-full bg-[#7C3AED] text-white font-semibold rounded-lg py-2.5 hover:bg-[#6D2FE0] transition-colors"
             >
-              <div>
-                <span className="inline-block text-xs uppercase tracking-wide px-2 py-0.5 rounded-full border border-[#262636] mb-1">
-                  {TYPE_LABEL[t.type] || t.type}
-                </span>
-                <p className="text-[#9C97B8] text-sm">{t.reason}</p>
-                <p className="text-[#9C97B8]/60 text-xs">{formatDate(t.happened_at)}</p>
-              </div>
-              <div className="text-right">
-                <p className={`font-semibold ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
-                  {t.type === 'payment' ? '-' : '+'}₹{t.amount}
-                </p>
-                <p className="text-[#9C97B8]/60 text-xs">Balance: ₹{t.balance_after}</p>
-              </div>
-            </div>
-          ))}
+              Request Top Up
+            </button>
+          </div>
         </div>
+
+        <div className="flex gap-1 border-b border-[#262636] mb-5">
+          <button
+            onClick={() => setTab('transactions')}
+            className={`text-sm px-4 py-2.5 border-b-2 transition-colors ${
+              tab === 'transactions'
+                ? 'border-[#7C3AED] text-[#F5F3FF]'
+                : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
+            }`}
+          >
+            Transactions
+          </button>
+          <button
+            onClick={() => setTab('requests')}
+            className={`text-sm px-4 py-2.5 border-b-2 transition-colors ${
+              tab === 'requests'
+                ? 'border-[#7C3AED] text-[#F5F3FF]'
+                : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
+            }`}
+          >
+            Top Up Requests
+          </button>
+        </div>
+
+        {tab === 'transactions' && (
+          <div className="space-y-2">
+            {transactions.length === 0 && <p className="text-[#9C97B8]">No transactions yet.</p>}
+            {transactions.map((t) => (
+              <div
+                key={t.transaction_id}
+                className="bg-[#14141F] border border-[#262636] rounded-lg px-5 py-4 flex items-center justify-between"
+              >
+                <div>
+                  <span className="inline-block text-xs uppercase tracking-wide px-2 py-0.5 rounded-full border border-[#262636] mb-1">
+                    {t.type}
+                  </span>
+                  <p className="text-[#9C97B8] text-sm">{t.reason}</p>
+                  <p className="text-[#9C97B8]/60 text-xs">{formatDate(t.happened_at)}</p>
+                </div>
+                <div className="text-right">
+                  <p className={`font-semibold ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
+                    {t.type === 'payment' ? '-' : '+'}₹{t.amount}
+                  </p>
+                  <p className="text-[#9C97B8]/60 text-xs">Balance: ₹{t.balance_after}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'requests' && (
+          <div className="space-y-2">
+            {requests.length === 0 && <p className="text-[#9C97B8]">No top up requests yet.</p>}
+            {requests.map((r) => (
+              <div
+                key={r.request_id}
+                className="bg-[#14141F] border border-[#262636] rounded-lg px-5 py-4 flex items-center justify-between"
+              >
+                <div>
+                  <span
+                    className={`inline-block text-xs uppercase tracking-wide px-2 py-0.5 rounded-full border mb-1 ${
+                      REQ_STATUS_STYLE[r.status] || 'border-[#262636] text-[#9C97B8]'
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                  <p className="text-[#9C97B8]/60 text-xs">
+                    Requested {formatDate(r.requested_at)}
+                  </p>
+                  {r.processed_at && (
+                    <p className="text-[#9C97B8]/60 text-xs">
+                      Processed {formatDate(r.processed_at)}
+                    </p>
+                  )}
+                </div>
+                <p className="font-semibold">₹{r.amount}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
