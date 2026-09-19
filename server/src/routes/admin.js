@@ -1,11 +1,11 @@
 import express from "express";
 import pool from "../db/db.js";
-import { verifyToken, requireAdmin } from "../middleware/auth.js";
+import { requireAdminAuth } from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
 // Every route in this file requires a logged-in admin.
-router.use(verifyToken, requireAdmin);
+router.use(requireAdminAuth);
 
 // GET /admin/me
 // Lets the frontend check "am I an admin?" without guessing.

@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { getAdminWallets, getAdminTransactions } from '../../api/api';
+import { getWallets, getTransactions } from '../api/api';
 
 function formatDate(iso) {
   return iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 }
 
-export default function AdminWallets() {
+export default function Wallets() {
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [tab, setTab] = useState('wallets');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getAdminWallets().then(setWallets).catch((err) => setError(err.message));
-    getAdminTransactions().then(setTransactions).catch(() => {});
+    getWallets().then(setWallets).catch((err) => setError(err.message));
+    getTransactions().then(setTransactions).catch(() => {});
   }, []);
 
   return (
@@ -30,9 +30,7 @@ export default function AdminWallets() {
         <button
           onClick={() => setTab('wallets')}
           className={`text-sm px-4 py-2.5 border-b-2 transition-colors ${
-            tab === 'wallets'
-              ? 'border-[#7C3AED] text-[#F5F3FF]'
-              : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
+            tab === 'wallets' ? 'border-[#7C3AED] text-[#F5F3FF]' : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
           }`}
         >
           Balances
@@ -40,9 +38,7 @@ export default function AdminWallets() {
         <button
           onClick={() => setTab('transactions')}
           className={`text-sm px-4 py-2.5 border-b-2 transition-colors ${
-            tab === 'transactions'
-              ? 'border-[#7C3AED] text-[#F5F3FF]'
-              : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
+            tab === 'transactions' ? 'border-[#7C3AED] text-[#F5F3FF]' : 'border-transparent text-[#9C97B8] hover:text-[#F5F3FF]'
           }`}
         >
           All Transactions
@@ -101,11 +97,7 @@ export default function AdminWallets() {
                   <td className="py-3 pr-4 text-[#9C97B8]/60 text-xs whitespace-nowrap">
                     {formatDate(t.happened_at)}
                   </td>
-                  <td
-                    className={`py-3 pr-4 text-right font-semibold whitespace-nowrap ${
-                      t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'
-                    }`}
-                  >
+                  <td className={`py-3 pr-4 text-right font-semibold whitespace-nowrap ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
                     {t.type === 'payment' ? '-' : '+'}₹{t.amount}
                   </td>
                   <td className="py-3 text-right text-[#9C97B8]">₹{t.balance_after}</td>

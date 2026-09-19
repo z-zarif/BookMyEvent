@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  getAddMoneyRequests,
-  approveAddMoneyRequest,
-  rejectAddMoneyRequest,
-} from '../../api/api';
+import { getAddMoneyRequests, approveAddMoneyRequest, rejectAddMoneyRequest } from '../api/api';
 
 function formatDate(iso) {
   return iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
@@ -15,7 +11,7 @@ const STATUS_STYLE = {
   rejected: 'text-[#FF3D77] border-[#FF3D77]/40',
 };
 
-export default function AdminRequests() {
+export default function Requests() {
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState('pending');
   const [error, setError] = useState('');
@@ -38,7 +34,7 @@ export default function AdminRequests() {
     try {
       if (action === 'approve') await approveAddMoneyRequest(id);
       else await rejectAddMoneyRequest(id);
-      load(); // refetch so the balance change from the DB trigger is reflected
+      load();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -50,8 +46,8 @@ export default function AdminRequests() {
     <div className="max-w-4xl">
       <h1 className="font-['Anton'] text-3xl tracking-tight mb-2">MONEY REQUESTS</h1>
       <p className="text-[#9C97B8] text-sm mb-6">
-        Approving a request sets its status to approved, which fires the database
-        trigger that creates the deposit and updates the user's balance.
+        Approving sets status to approved, which fires the database trigger that
+        creates the deposit and updates the user's wallet balance.
       </p>
 
       <div className="flex gap-1 border-b border-[#1C1C2A] mb-5">

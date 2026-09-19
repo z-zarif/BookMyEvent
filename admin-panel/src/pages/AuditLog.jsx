@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { getAuditLog } from '../../api/api';
+import { getAuditLog } from '../api/api';
 
 function formatDate(iso) {
   return iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 }
 
-export default function AdminAuditLog() {
+export default function AuditLog() {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ export default function AdminAuditLog() {
       <h1 className="font-['Anton'] text-3xl tracking-tight mb-2">TICKET AUDIT LOG</h1>
       <p className="text-[#9C97B8] text-sm mb-6">
         Written automatically by the database trigger whenever a ticket type's
-        quantity or status changes — including every booking and cancellation.
+        quantity or status changes - including every booking and cancellation.
       </p>
 
       {error && (
@@ -32,9 +32,7 @@ export default function AdminAuditLog() {
       )}
       {loading && <p className="text-[#9C97B8]">Loading...</p>}
       {!loading && logs.length === 0 && !error && (
-        <p className="text-[#9C97B8]">
-          No changes logged yet. Make a booking and refresh — a row should appear.
-        </p>
+        <p className="text-[#9C97B8]">No changes logged yet.</p>
       )}
 
       {logs.length > 0 && (
@@ -59,11 +57,7 @@ export default function AdminAuditLog() {
                       <span>
                         <span className="text-[#9C97B8]">{l.old_quantity}</span>
                         <span className="text-[#9C97B8]/50 mx-1.5">→</span>
-                        <span
-                          className={
-                            l.new_quantity < l.old_quantity ? 'text-[#FF3D77]' : 'text-[#4ADE80]'
-                          }
-                        >
+                        <span className={l.new_quantity < l.old_quantity ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}>
                           {l.new_quantity}
                         </span>
                       </span>

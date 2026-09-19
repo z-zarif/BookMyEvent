@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAdminStats } from '../../api/api';
+import { getStats } from '../api/api';
 
 function Stat({ label, value, accent }) {
   return (
@@ -11,12 +11,12 @@ function Stat({ label, value, accent }) {
   );
 }
 
-export default function AdminOverview() {
+export default function Overview() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getAdminStats().then(setStats).catch((err) => setError(err.message));
+    getStats().then(setStats).catch((err) => setError(err.message));
   }, []);
 
   return (
@@ -46,7 +46,7 @@ export default function AdminOverview() {
 
           {Number(stats.pending_requests) > 0 && (
             <Link
-              to="/admin/requests"
+              to="/requests"
               className="inline-block text-sm font-semibold px-5 py-2.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
             >
               Review {stats.pending_requests} pending request

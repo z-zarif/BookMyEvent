@@ -1,24 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { checkAdmin } from '../api/api';
 
 export default function Navbar() {
   const { isLoggedIn, isOrganizer, logoutUser } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-
-  // Ask the server whether this user is an admin. Silently false if not -
-  // non-admins just never see the link.
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setIsAdmin(false);
-      return;
-    }
-    checkAdmin()
-      .then(() => setIsAdmin(true))
-      .catch(() => setIsAdmin(false));
-  }, [isLoggedIn]);
 
   function handleLogout() {
     logoutUser();
@@ -44,11 +29,6 @@ export default function Navbar() {
             ) : (
               <Link to="/become-organizer" className="hover:text-[#F5F3FF] transition-colors">
                 Become an Organizer
-              </Link>
-            )}
-            {isAdmin && (
-              <Link to="/admin" className="text-[#7C3AED] hover:text-[#9061F9] transition-colors">
-                Admin
               </Link>
             )}
             <button onClick={handleLogout} className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors">

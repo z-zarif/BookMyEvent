@@ -61,19 +61,4 @@ export const getWishlist = () => client.get('/wishlist');
 export const addToWishlist = (eventId) => client.post('/wishlist', { eventId });
 export const removeFromWishlist = (eventId) => client.delete(`/wishlist/${eventId}`);
 
-// ---- Admin ----
-// Admin access is controlled by the ADMIN_EMAILS list in the server's .env.
-// checkAdmin() succeeding means the logged-in user is an admin.
-export const checkAdmin = () => client.get('/admin/me');
-export const getAdminStats = () => client.get('/admin/stats');
-export const getAddMoneyRequests = (status) =>
-  client.get('/admin/add-money-requests', { params: status ? { status } : {} });
-export const approveAddMoneyRequest = (id) =>
-  client.post(`/admin/add-money-requests/${id}/approve`);
-export const rejectAddMoneyRequest = (id) =>
-  client.post(`/admin/add-money-requests/${id}/reject`);
-export const getAdminWallets = () => client.get('/admin/wallets');
-export const getAdminTransactions = () => client.get('/admin/transactions');
-export const getAuditLog = () => client.get('/admin/audit-log');
-
 export default client;

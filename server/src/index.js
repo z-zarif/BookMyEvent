@@ -9,6 +9,7 @@ import organizersRouter from './routes/organizers.js';
 import walletRouter from './routes/wallet.js';
 import wishlistRouter from './routes/wishlist.js';
 import adminRouter from './routes/admin.js';
+import adminAuthRouter from './routes/adminAuth.js';
 //the ./ means:
 //"Start from the folder containing the current file."
 //the ../ means:
@@ -27,6 +28,7 @@ app.use('/organizers', organizersRouter);
 app.use('/wallet', walletRouter);
 app.use('/wishlist', wishlistRouter);
 app.use('/admin', adminRouter);
+app.use('/admin-auth', adminAuthRouter);
 
 // Test route
 app.get('/', (req, res) => {
