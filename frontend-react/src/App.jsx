@@ -16,13 +16,15 @@ import BecomeOrganizer from './pages/BecomeOrganizer';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import CreateEvent from './pages/CreateEvent';
 
+
 export default function App() {
   const location = useLocation();
-  // Landing/Login/Register/BecomeOrganizer have their own minimal headers
+
+  // Pages with their own self-contained header skip the shared navbar.
   const hideNavbar = ['/', '/login', '/register', '/become-organizer'].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0B0B14]">
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -31,14 +33,14 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/events/:id" element={<EventDetails />} />
 
-        {/* Protected routes: redirect to /login if not authenticated */}
+        {/* Requires login */}
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
         <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
         <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
 
-        {/* Organizer routes */}
+        {/* Organizer */}
         <Route path="/become-organizer" element={<ProtectedRoute><BecomeOrganizer /></ProtectedRoute>} />
         <Route path="/organizer/dashboard" element={<ProtectedRoute><OrganizerDashboard /></ProtectedRoute>} />
         <Route path="/organizer/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />

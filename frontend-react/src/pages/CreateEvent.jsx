@@ -162,7 +162,7 @@ export default function CreateEvent() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-[#9C97B8] block mb-1.5">Price (₹)</label>
+                  <label className="text-xs text-[#9C97B8] block mb-1.5">Price (৳)</label>
                   <input
                     type="number"
                     min={1}

@@ -90,7 +90,7 @@ export default function EventDetails() {
                     <p className="text-[#9C97B8] text-sm mb-4">{tt.quantity_available} left</p>
 
                     <Link
-                      to={`/checkout?typeId=${tt.type_id}&price=${tt.price}&category=${tt.category}`}
+                      to={`/checkout?typeId=${tt.type_id}&price=${tt.price}&category=${tt.category}&title=${encodeURIComponent(event.title)}`}
                       className="inline-block w-full text-center text-sm font-semibold px-4 py-2.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6D2FE0] transition-colors"
                     >
                       Book

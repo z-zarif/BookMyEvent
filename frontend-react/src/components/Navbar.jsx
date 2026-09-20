@@ -11,11 +11,11 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="flex items-center justify-between px-8 py-4 bg-[#0B0B14] border-b border-[#262636]">
+    <nav className="flex items-center justify-between px-8 py-4 bg-[#0B0B14] border-b border-[#262636] flex-wrap gap-3">
       <Link to="/events" className="font-['Anton'] text-xl tracking-tight text-[#F5F3FF]">
         EVENTIA
       </Link>
-      <div className="flex items-center gap-6 text-sm font-['Manrope'] text-[#9C97B8]">
+      <div className="flex items-center gap-6 text-sm font-['Manrope'] text-[#9C97B8] flex-wrap">
         <Link to="/events" className="hover:text-[#F5F3FF] transition-colors">Events</Link>
         {isLoggedIn ? (
           <>
@@ -23,9 +23,13 @@ export default function Navbar() {
             <Link to="/my-bookings" className="hover:text-[#F5F3FF] transition-colors">My Bookings</Link>
             <Link to="/wallet" className="hover:text-[#F5F3FF] transition-colors">Wallet</Link>
             {isOrganizer ? (
-              <Link to="/organizer/dashboard" className="hover:text-[#F5F3FF] transition-colors">Dashboard</Link>
+              <Link to="/organizer/dashboard" className="hover:text-[#F5F3FF] transition-colors">
+                Dashboard
+              </Link>
             ) : (
-              <Link to="/become-organizer" className="hover:text-[#F5F3FF] transition-colors">Become an Organizer</Link>
+              <Link to="/become-organizer" className="hover:text-[#F5F3FF] transition-colors">
+                Become an Organizer
+              </Link>
             )}
             <button onClick={handleLogout} className="text-[#FF3D77] hover:text-[#FF3D77]/80 transition-colors">
               Logout
