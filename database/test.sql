@@ -48,3 +48,23 @@ WHERE p.prorettype = 'trigger'::regtype
   AND regexp_replace(t.line, '--.*$', '') !~* 'ticket_type_id'
 ORDER BY p.proname;
 
+
+
+SELECT USER_ID FROM USERS;
+SELECT USER_ID, WALLET_ID FROM WALLETS;
+
+SELECT tgname, tgrelid::regclass AS on_table
+FROM pg_trigger
+WHERE NOT tgisinternal;
+
+
+INSERT INTO WALLETS (WALLET_ID, USER_ID)
+SELECT fn_generate_id('WAL'), U.USER_ID
+FROM USERS U
+WHERE NOT EXISTS (SELECT 1 FROM WALLETS W WHERE W.USER_ID = U.USER_ID);
+
+SELECT COUNT(*) FROM WALLETS;  -- should be 11
+
+
+SELECT EMAIL 
+FROM USERS;
