@@ -2,8 +2,30 @@ import express from "express";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/db.js";
+import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
+
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT USER_ID, USER_NAME, EMAIL, GENDER, CREATED_AT, ACCOUNT_STATUS
+       FROM USERS
+       WHERE USER_ID = $1`,
+      [req.user.user_id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Profile fetch error:", err);
+    res.status(500).json({ error: "Could not fetch user profile" });
+  }
+});
+
 // Creates a new Express Router to define and organize routes.
 //An Express Router is like a mini Express application that lets you group related API routes into a separate file.
 //! Creates a POST route for registering a new user.

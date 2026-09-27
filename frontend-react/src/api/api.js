@@ -28,6 +28,7 @@ export const register = (userName, email, password, gender) =>
 
 export const login = (email, password) =>
   client.post('/auth/login/user', { email, password });
+export const getCurrentUser = () => client.get('/auth/me');
 
 // ---- Events ----
 export const getEvents = () => client.get('/events/getevents');

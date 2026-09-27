@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { getCurrentUser } from '../api/api';
 
 const AuthContext = createContext(null);
 
@@ -20,6 +21,21 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : null;
   });
   const [role, setRole] = useState(() => decodeRole(localStorage.getItem('token')));
+
+  useEffect(() => {
+    if (!token) return;
+
+    getCurrentUser()
+      .then((currentUser) => {
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        setUser(currentUser);
+      })
+      .catch((err) => {
+        if (err.message === 'Invalid or expired token' || err.message === 'Token has been logged out') {
+          logoutUser();
+        }
+      });
+  }, [token]);
 
   function loginUser(newToken, newUser) {
     localStorage.setItem('token', newToken);
