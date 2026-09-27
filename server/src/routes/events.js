@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/getevents", async (req, res) => {
   try {
     const result =
-      await pool.query(`SELECT E.TITLE, E.EVENT_ID, U.USER_NAME, E.VENUE,E.EVENT_DATE_TIME,E.DESCRIBE_EVENT,E.STATUS
+      await pool.query(`SELECT E.TITLE, E.EVENT_ID, U.USER_NAME, E.VENUE,E.EVENT_DATE_TIME,E.DESCRIBE_EVENT,E.STATUS,E.PHOTO_URL
                                         FROM EVENTS E 
                                         JOIN ORGANIZERS O 
                                         ON E.ORGANIZER_ID=O.ORGANIZER_ID
@@ -31,7 +31,7 @@ router.get("/getevents", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const eventResult = await pool.query(
-      `SELECT E.EVENT_ID, E.TITLE, E.EVENT_DATE_TIME, E.VENUE, E.DESCRIBE_EVENT, E.STATUS, U.USER_NAME
+      `SELECT E.EVENT_ID, E.TITLE, E.EVENT_DATE_TIME, E.VENUE, E.DESCRIBE_EVENT, E.STATUS, E.PHOTO_URL, U.USER_NAME
        FROM EVENTS E
        JOIN ORGANIZERS O ON E.ORGANIZER_ID = O.ORGANIZER_ID
        JOIN USERS U ON O.ORGANIZER_ID = U.USER_ID
@@ -61,7 +61,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
-  const { title, date_time, venue, description, ticketTypes } = req.body;
+  const { title, date_time, venue, description, ticketTypes, photoUrl } = req.body;
  
 
   if (!title || !venue || !ticketTypes||ticketTypes.length===0) {
@@ -74,10 +74,10 @@ router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
     await client.query("BEGIN");
     const orgId = req.user.user_id;
     const eventResult = await client.query(
-      `INSERT INTO EVENTS (EVENT_ID, ORGANIZER_ID,TITLE,EVENT_DATE_TIME,VENUE,DESCRIBE_EVENT)
-            VALUES(fn_generate_id('EVNT'),$1,$2,$3,$4,$5)
+      `INSERT INTO EVENTS (EVENT_ID, ORGANIZER_ID,TITLE,EVENT_DATE_TIME,VENUE,DESCRIBE_EVENT,PHOTO_URL)
+            VALUES(fn_generate_id('EVNT'),$1,$2,$3,$4,$5,$6)
             RETURNING EVENT_ID`,
-      [orgId, title, date_time, venue, description],
+      [orgId, title, date_time, venue, description, photoUrl || null],
     );
     const eventId = eventResult.rows[0].event_id;
     for (const t of ticketTypes) {
@@ -107,7 +107,7 @@ router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
 
 router.post('/:eventId/cancel', verifyToken, requireOrganizer, async (req, res) => {
   const { eventId } = req.params;
-  const organizerId = req.user.userId; // ⚠️ same key-name check as before — confirm against your JWT payload
+  const organizerId = req.user.user_id;
 
   try {
     await pool.query('CALL cancel_event($1, $2)', [eventId, organizerId]);
