@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getEvent, addToWishlist } from '../api/api';
+import { getEvent, addToWishlist, removeFromWishlist, getWishlist } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 
 function formatDate(iso) {
@@ -14,6 +14,8 @@ export default function EventDetails() {
   const [event, setEvent] = useState(null);
   const [ticketTypes, setTicketTypes] = useState([]);
   const [error, setError] = useState('');
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistBusy, setWishlistBusy] = useState(false);
 
   useEffect(() => {
     getEvent(id)
@@ -24,13 +26,36 @@ export default function EventDetails() {
       .catch((err) => setError(err.message));
   }, [id]);
 
+  // Separate effect: only makes sense to check wishlist status if logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsWishlisted(false);
+      return;
+    }
+    getWishlist()
+      .then((items) => {
+        setIsWishlisted(items.some((ev) => ev.event_id === id));
+      })
+      .catch(() => {
+        // Non-fatal — leave button in default "not saved" state
+      });
+  }, [id, isLoggedIn]);
+
   async function handleWishlist() {
     if (!isLoggedIn) return navigate('/login');
+    setWishlistBusy(true);
     try {
-      await addToWishlist(id);
-      alert('Added to wishlist!');
+      if (isWishlisted) {
+        await removeFromWishlist(id);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlist(id);
+        setIsWishlisted(true);
+      }
     } catch (err) {
       alert(err.message);
+    } finally {
+      setWishlistBusy(false);
     }
   }
 
@@ -61,9 +86,14 @@ export default function EventDetails() {
 
               <button
                 onClick={handleWishlist}
-                className="mt-5 text-sm font-semibold px-5 py-2.5 rounded-full border border-[#262636] text-[#F5F3FF] hover:border-[#7C3AED] transition-colors"
+                disabled={wishlistBusy}
+                className={`mt-5 text-sm font-semibold px-5 py-2.5 rounded-full border transition-colors disabled:opacity-50 ${
+                  isWishlisted
+                    ? 'border-[#7C3AED] text-[#7C3AED] hover:border-[#FF3D77] hover:text-[#FF3D77]'
+                    : 'border-[#262636] text-[#F5F3FF] hover:border-[#7C3AED]'
+                }`}
               >
-                + Add to Wishlist
+                {isWishlisted ? '✓ Saved — Remove' : '+ Add to Wishlist'}
               </button>
             </div>
 
