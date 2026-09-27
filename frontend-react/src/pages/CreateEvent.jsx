@@ -13,6 +13,7 @@ export default function CreateEvent() {
   const [dateTime, setDateTime] = useState('');
   const [venue, setVenue] = useState('');
   const [description, setDescription] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [ticketTypes, setTicketTypes] = useState([emptyTicketType()]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -42,6 +43,7 @@ export default function CreateEvent() {
         date_time: dateTime,
         venue,
         description,
+        photoUrl: photoUrl.trim() || undefined,
         ticketTypes: ticketTypes.map((tt) => ({
           category: tt.category,
           quantity: Number(tt.quantity),
@@ -119,6 +121,25 @@ export default function CreateEvent() {
                 placeholder="What should fans know about this show?"
                 className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors resize-none"
               />
+            </div>
+
+            <div>
+              <label className="text-xs text-[#9C97B8] block mb-1.5">Photo URL (optional)</label>
+              <input
+                type="url"
+                value={photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                placeholder="https://... (leave blank to use a placeholder)"
+                className="w-full bg-[#0B0B14] border border-[#262636] rounded-lg px-3.5 py-2.5 text-[#F5F3FF] placeholder-[#9C97B8]/50 focus:outline-none focus:border-[#7C3AED] transition-colors"
+              />
+              {photoUrl.trim() && (
+                <img
+                  src={photoUrl}
+                  alt="Preview"
+                  className="mt-3 w-full h-40 object-cover rounded-lg border border-[#262636]"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              )}
             </div>
           </div>
 

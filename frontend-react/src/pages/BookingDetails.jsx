@@ -67,7 +67,7 @@ export default function BookingDetails() {
               </div>
               <div className="text-right">
                 <p className="text-[#9C97B8] text-xs uppercase tracking-wide">Total</p>
-                <p className="text-2xl font-semibold">₹{booking.total_cost}</p>
+                <p className="text-2xl font-semibold">৳{booking.total_cost}</p>
               </div>
             </div>
 
@@ -85,7 +85,7 @@ export default function BookingDetails() {
                     <span className="text-xs uppercase tracking-wide text-[#9C97B8]">
                       {t.category}
                     </span>
-                    <span className="text-xs text-[#9C97B8]">₹{t.price_paid}</span>
+                    <span className="text-xs text-[#9C97B8]">৳{t.price_paid}</span>
                   </div>
 
                   <div className="px-5 py-5">

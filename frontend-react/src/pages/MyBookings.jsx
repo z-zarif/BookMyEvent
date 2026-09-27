@@ -91,7 +91,7 @@ export default function MyBookings() {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <p className="text-lg font-semibold whitespace-nowrap mb-2">₹{b.total_cost}</p>
+                  <p className="text-lg font-semibold whitespace-nowrap mb-2">৳{b.total_cost}</p>
                   <div className="flex gap-2 justify-end">
                     <Link
                       to={`/bookings/${b.booking_id}`}

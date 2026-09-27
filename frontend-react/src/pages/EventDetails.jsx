@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getEvent, addToWishlist, removeFromWishlist, getWishlist } from '../api/api';
 import { useAuth } from '../context/AuthContext';
+import { eventPhotoUrl } from '../utils/eventPhoto';
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -75,6 +76,12 @@ export default function EventDetails() {
 
         {event && (
           <>
+            <img
+              src={eventPhotoUrl(event)}
+              alt={event.title}
+              className="w-full h-56 md:h-72 object-cover rounded-xl mt-6 border border-[#262636]"
+            />
+
             <div className="mt-6 mb-10">
               <h1 className="font-['Anton'] text-4xl md:text-5xl tracking-tight mb-2">
                 {event.title}
@@ -116,7 +123,7 @@ export default function EventDetails() {
                   </div>
 
                   <div className="px-5 py-5">
-                    <p className="font-['Anton'] text-3xl tracking-tight mb-1">₹{tt.price}</p>
+                    <p className="font-['Anton'] text-3xl tracking-tight mb-1">৳{tt.price}</p>
                     <p className="text-[#9C97B8] text-sm mb-4">{tt.quantity_available} left</p>
 
                     <Link

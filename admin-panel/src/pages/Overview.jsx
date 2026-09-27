@@ -41,7 +41,7 @@ export default function Overview() {
               value={stats.pending_requests}
               accent={Number(stats.pending_requests) > 0 ? 'text-[#FACC15]' : ''}
             />
-            <Stat label="Total Wallet Balance" value={`₹${stats.total_wallet_balance}`} />
+            <Stat label="Total Wallet Balance" value={`৳${stats.total_wallet_balance}`} />
           </div>
 
           {Number(stats.pending_requests) > 0 && (

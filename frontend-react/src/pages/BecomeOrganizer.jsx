@@ -7,8 +7,16 @@ export default function BecomeOrganizer() {
   const [companyName, setCompanyName] = useState('');
   const [bio, setBio] = useState('');
   const [error, setError] = useState('');
-  const { refreshToken } = useAuth();
+  const { refreshToken, isOrganizer } = useAuth();
   const navigate = useNavigate();
+
+  // Already an organizer? Don't show this form at all - send them straight
+  // to their dashboard instead of letting them land here with no way out
+  // other than actually submitting.
+  if (isOrganizer) {
+    navigate('/organizer/dashboard', { replace: true });
+    return null;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,6 +40,13 @@ export default function BecomeOrganizer() {
       </Link>
 
       <div className="w-full max-w-sm">
+        <Link
+          to="/events"
+          className="inline-block text-sm text-[#9C97B8] hover:text-white transition-colors mb-4"
+        >
+          ← Back to Events
+        </Link>
+
         <div className="bg-[#14141F] border border-[#262636] rounded-xl overflow-hidden">
           <div className="px-7 py-5 border-b border-[#262636]">
             <p className="text-xs uppercase tracking-wide text-[#9C97B8]">Backstage access</p>

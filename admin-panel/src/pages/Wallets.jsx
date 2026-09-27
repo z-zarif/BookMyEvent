@@ -62,7 +62,7 @@ export default function Wallets() {
                   <td className="py-3 pr-4">{w.user_name}</td>
                   <td className="py-3 pr-4 text-[#9C97B8]">{w.email}</td>
                   <td className="py-3 pr-4 text-[#9C97B8]/60 text-xs">{formatDate(w.last_used)}</td>
-                  <td className="py-3 text-right font-semibold">₹{w.balance}</td>
+                  <td className="py-3 text-right font-semibold">৳{w.balance}</td>
                 </tr>
               ))}
             </tbody>
@@ -98,9 +98,9 @@ export default function Wallets() {
                     {formatDate(t.happened_at)}
                   </td>
                   <td className={`py-3 pr-4 text-right font-semibold whitespace-nowrap ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
-                    {t.type === 'payment' ? '-' : '+'}₹{t.amount}
+                    {t.type === 'payment' ? '-' : '+'}৳{t.amount}
                   </td>
-                  <td className="py-3 text-right text-[#9C97B8]">₹{t.balance_after}</td>
+                  <td className="py-3 text-right text-[#9C97B8]">৳{t.balance_after}</td>
                 </tr>
               ))}
             </tbody>

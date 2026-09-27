@@ -57,17 +57,17 @@ export default function Checkout() {
             </div>
             <div className="flex justify-between">
               <span className="text-[#9C97B8]">Subtotal</span>
-              <span>₹{result.totalCost}</span>
+              <span>৳{result.totalCost}</span>
             </div>
             {result.discount > 0 && (
               <div className="flex justify-between text-[#4ADE80]">
                 <span>Discount</span>
-                <span>-₹{result.discount}</span>
+                <span>-৳{result.discount}</span>
               </div>
             )}
             <div className="flex justify-between border-t border-[#262636] pt-3 font-semibold">
               <span>Charged</span>
-              <span>₹{result.amountCharged}</span>
+              <span>৳{result.amountCharged}</span>
             </div>
 
             <div className="flex gap-2 pt-3">
@@ -110,7 +110,7 @@ export default function Checkout() {
 
             <div className="flex justify-between text-sm">
               <span className="text-[#9C97B8]">Price per ticket</span>
-              <span className="font-semibold">₹{price}</span>
+              <span className="font-semibold">৳{price}</span>
             </div>
 
             <div>
@@ -154,7 +154,7 @@ export default function Checkout() {
 
             <div className="flex justify-between border-t border-[#262636] pt-4">
               <span className="text-[#9C97B8] text-sm">Total</span>
-              <span className="font-semibold">₹{(price * qty).toFixed(2)}</span>
+              <span className="font-semibold">৳{(price * qty).toFixed(2)}</span>
             </div>
 
             <button

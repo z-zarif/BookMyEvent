@@ -74,7 +74,7 @@ export default function Wallet() {
           <div className="bg-[#14141F] border border-[#262636] rounded-xl px-7 py-6">
             <p className="text-xs uppercase tracking-wide text-[#9C97B8] mb-1">Current Balance</p>
             <p className="font-['Anton'] text-5xl tracking-tight">
-              {wallet ? `₹${wallet.balance}` : '...'}
+              {wallet ? `৳${wallet.balance}` : '...'}
             </p>
             {wallet?.last_used && (
               <p className="text-[#9C97B8]/60 text-xs mt-2">
@@ -142,9 +142,9 @@ export default function Wallet() {
                 </div>
                 <div className="text-right">
                   <p className={`font-semibold ${t.type === 'payment' ? 'text-[#FF3D77]' : 'text-[#4ADE80]'}`}>
-                    {t.type === 'payment' ? '-' : '+'}₹{t.amount}
+                    {t.type === 'payment' ? '-' : '+'}৳{t.amount}
                   </p>
-                  <p className="text-[#9C97B8]/60 text-xs">Balance: ₹{t.balance_after}</p>
+                  <p className="text-[#9C97B8]/60 text-xs">Balance: ৳{t.balance_after}</p>
                 </div>
               </div>
             ))}
@@ -176,7 +176,7 @@ export default function Wallet() {
                     </p>
                   )}
                 </div>
-                <p className="font-semibold">₹{r.amount}</p>
+                <p className="font-semibold">৳{r.amount}</p>
               </div>
             ))}
           </div>

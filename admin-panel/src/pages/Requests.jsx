@@ -99,7 +99,7 @@ export default function Requests() {
             </div>
 
             <div className="flex items-center gap-4">
-              <p className="font-['Anton'] text-2xl tracking-tight">₹{r.amount}</p>
+              <p className="font-['Anton'] text-2xl tracking-tight">৳{r.amount}</p>
 
               {r.status === 'pending' && (
                 <div className="flex gap-2">

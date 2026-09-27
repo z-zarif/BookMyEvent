@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getEvents } from '../api/api';
+import { eventPhotoUrl } from '../utils/eventPhoto';
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -43,6 +44,13 @@ export default function Home() {
               key={ev.event_id}
               className="bg-[#14141F] border border-[#262636] rounded-xl overflow-hidden hover:border-[#7C3AED]/50 transition-colors"
             >
+              <img
+                src={eventPhotoUrl(ev)}
+                alt={ev.title}
+                className="w-full h-36 object-cover"
+                loading="lazy"
+              />
+
               <div className="px-5 py-4 border-b border-[#262636] flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wide text-[#9C97B8]">
                   {ev.status}
