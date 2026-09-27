@@ -1,6 +1,10 @@
+DROP PROCEDURE IF EXISTS cancel_booking(CHAR, CHAR);
+DROP PROCEDURE IF EXISTS cancel_booking(CHAR, CHAR, BOOLEAN);
+
 CREATE OR REPLACE PROCEDURE cancel_booking(
     p_booking_id CHAR(15),
-    p_user_id    CHAR(15)
+    p_user_id    CHAR(15),
+    p_enforce_cutoff BOOLEAN DEFAULT TRUE
 )
 LANGUAGE plpgsql
 AS $$
@@ -9,11 +13,13 @@ DECLARE
     v_owner_id   CHAR(15);
     v_amount     NUMERIC(10,2);
     v_wallet_id  CHAR(15);
+    v_event_date_time TIMESTAMP;
 BEGIN
-    SELECT BK_STATUS, USER_ID
-    INTO v_bk_status, v_owner_id
-    FROM BOOKINGS
-    WHERE BOOKING_ID = p_booking_id
+    SELECT B.BK_STATUS, B.USER_ID, E.EVENT_DATE_TIME
+    INTO v_bk_status, v_owner_id, v_event_date_time
+    FROM BOOKINGS B
+    JOIN EVENTS E ON E.EVENT_ID = B.EVENT_ID
+    WHERE B.BOOKING_ID = p_booking_id
     FOR UPDATE;
 
     IF NOT FOUND THEN
@@ -29,6 +35,12 @@ BEGIN
     IF v_bk_status = 'cancelled' THEN
         RAISE EXCEPTION 'Booking % is already cancelled', p_booking_id
             USING ERRCODE = 'BK409';
+    END IF;
+
+    IF p_enforce_cutoff
+       AND v_event_date_time <= CURRENT_TIMESTAMP + INTERVAL '2 days' THEN
+        RAISE EXCEPTION 'Bookings cannot be cancelled within 2 days of the event'
+            USING ERRCODE = 'BK422';
     END IF;
 
     SELECT AMOUNT, DEBITED_FROM
@@ -97,7 +109,7 @@ BEGIN
           AND BK_STATUS IN ('pending', 'confirmed')
         ORDER BY BOOKING_ID
     LOOP
-        CALL cancel_booking(r.BOOKING_ID, r.USER_ID);
+        CALL cancel_booking(r.BOOKING_ID, r.USER_ID, FALSE);
     END LOOP;
 
     UPDATE EVENTS

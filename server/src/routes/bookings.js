@@ -63,6 +63,13 @@ router.post("/", verifyToken, async (req, res) => {
     // Save information we will need later
     const eventId = ticketType.event_id;
     const price = ticketType.price;
+    const { rows: soldRows } = await client.query(
+      `SELECT COUNT(*)::int AS sold_count
+       FROM TICKETS
+       WHERE TICKET_TYPE_ID = $1`,
+      [typeId],
+    );
+    const capacity = Number(ticketType.quantity_available) + soldRows[0].sold_count;
     // 4. Create pending booking
     const { rows: bookingRows } = await client.query(
       `
@@ -103,7 +110,26 @@ router.post("/", verifyToken, async (req, res) => {
       );
 
       const ticketId = idRows[0].id;
-      const seatNumber = `S${ticketId.slice(-8)}`;
+      const { rows: seatRows } = await client.query(
+        `SELECT CONCAT(row_number, CHR(97 + seat_index)) AS seat_number
+         FROM generate_series(1, CEIL($2::numeric / 26)::int) AS row_number
+         CROSS JOIN generate_series(0, 25) AS seat_index
+         WHERE NOT EXISTS (
+           SELECT 1
+           FROM TICKETS
+           WHERE TICKET_TYPE_ID = $1
+             AND SEAT_NUMBER = CONCAT(row_number, CHR(97 + seat_index))
+         )
+         ORDER BY row_number, seat_index
+         LIMIT 1`,
+        [typeId, capacity],
+      );
+
+      if (seatRows.length === 0) {
+        throw new Error("No seats are available for this ticket type");
+      }
+
+      const seatNumber = seatRows[0].seat_number;
       // Insert one ticket
       await client.query(
         `
@@ -325,7 +351,8 @@ router.get("/mine", verifyToken, async (req, res) => {
          B.TOTAL_COST,
          E.TITLE AS EVENT_TITLE,
          E.EVENT_DATE_TIME,
-         E.VENUE
+         E.VENUE,
+         (E.EVENT_DATE_TIME > CURRENT_TIMESTAMP + INTERVAL '2 days') AS CAN_CANCEL
        FROM BOOKINGS B
        JOIN EVENTS E ON E.EVENT_ID = B.EVENT_ID
        WHERE B.USER_ID = $1
@@ -391,7 +418,10 @@ router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
   const userId = req.user.user_id;
 
   try {
-    await pool.query("CALL cancel_booking($1, $2)", [bookingId, userId]);
+    await pool.query(
+      "CALL cancel_booking($1::char(15), $2::char(15), $3::boolean)",
+      [bookingId, userId, true],
+    );
     res.status(200).json({ message: "Booking cancelled successfully" });
   } catch (err) {
     console.error(err);
@@ -402,7 +432,14 @@ router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
         return res.status(403).json({ error: err.message });
       case "BK409":
         return res.status(409).json({ error: err.message });
+      case "BK422":
+        return res.status(422).json({ error: err.message });
+      case "42883":
+        return res.status(500).json({
+          error: "The database cancellation procedure is outdated. Apply database/procedure.sql and restart the server.",
+        });
       default:
+        console.error("Cancellation database error:", err.message);
         return res.status(500).json({ error: "Failed to cancel booking" });
     }
   }

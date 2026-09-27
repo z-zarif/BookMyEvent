@@ -102,10 +102,11 @@ export default function MyBookings() {
                     {b.bk_status !== 'cancelled' && (
                       <button
                         onClick={() => handleCancel(b.booking_id)}
-                        disabled={cancellingId === b.booking_id}
-                        className="text-sm px-4 py-2 rounded-lg border border-[#262636] text-[#9C97B8] hover:text-[#FF3D77] hover:border-[#FF3D77]/50 transition-colors disabled:opacity-50 whitespace-nowrap"
+                        disabled={cancellingId === b.booking_id || !b.can_cancel}
+                        title={!b.can_cancel ? 'Cancellation is unavailable within 2 days of the event' : undefined}
+                        className="text-sm px-4 py-2 rounded-lg border border-[#262636] text-[#9C97B8] hover:text-[#FF3D77] hover:border-[#FF3D77]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                       >
-                        {cancellingId === b.booking_id ? '...' : 'Cancel'}
+                        {cancellingId === b.booking_id ? '...' : b.can_cancel ? 'Cancel' : 'Cancellation closed'}
                       </button>
                     )}
                   </div>
