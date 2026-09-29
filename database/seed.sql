@@ -1,3 +1,5 @@
+BEGIN;
+
 DO $$
 DECLARE
   organizer_ids CHAR(15)[] := '{}';
@@ -100,3 +102,26 @@ WHERE EVENT_ID IN (
     SELECT USER_ID FROM USERS WHERE EMAIL LIKE '%@eventia.test'
   )
 );
+
+-- 4. Test promo codes for checkout and admin reporting
+-- Active codes can be used immediately. The expired and inactive codes are
+-- intentional negative cases for validating promo rejection behavior.
+INSERT INTO PROMO_CODES
+  (PROMO_ID, CODE, VALID_FROM, VALID_TO, DISCOUNT_TYPE, DISCOUNT_VALUE, STATUS)
+VALUES
+  ('PRMTEST0000001', 'TEST10',      CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'percentage', 10.00, 'active'),
+  ('PRMTEST0000002', 'TEST25',      CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'percentage', 25.00, 'active'),
+  ('PRMTEST0000003', 'FLAT500',     CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'flat',       500.00, 'active'),
+  ('PRMTEST0000004', 'FLAT2000',    CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'flat',      2000.00, 'active'),
+  ('PRMTEST0000005', 'TEST1',       CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'percentage',  1.00, 'active'),
+  ('PRMTEST0000006', 'TEST100',     CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'percentage',100.00, 'active'),
+  ('PRMTEST0000007', 'EXPIRED10',   CURRENT_TIMESTAMP - INTERVAL '30 days', CURRENT_TIMESTAMP - INTERVAL '1 day', 'percentage', 10.00, 'active'),
+  ('PRMTEST0000008', 'INACTIVE10',  CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '30 days', 'percentage', 10.00, 'inactive')
+ON CONFLICT (CODE) DO UPDATE
+SET VALID_FROM = EXCLUDED.VALID_FROM,
+    VALID_TO = EXCLUDED.VALID_TO,
+    DISCOUNT_TYPE = EXCLUDED.DISCOUNT_TYPE,
+    DISCOUNT_VALUE = EXCLUDED.DISCOUNT_VALUE,
+    STATUS = EXCLUDED.STATUS;
+
+COMMIT;

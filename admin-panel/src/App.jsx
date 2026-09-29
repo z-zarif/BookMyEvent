@@ -6,6 +6,7 @@ import Overview from './pages/Overview';
 import Requests from './pages/Requests';
 import Wallets from './pages/Wallets';
 import AuditLog from './pages/AuditLog';
+import Reports from './pages/Reports';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="requests" element={<Requests />} />
         <Route path="wallets" element={<Wallets />} />
         <Route path="audit-log" element={<AuditLog />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
     </Routes>
   );

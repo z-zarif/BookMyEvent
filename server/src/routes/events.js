@@ -108,11 +108,15 @@ router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
 router.post('/:eventId/cancel', verifyToken, requireOrganizer, async (req, res) => {
   const { eventId } = req.params;
   const organizerId = req.user.user_id;
+  const client = await pool.connect();
 
   try {
-    await pool.query('CALL cancel_event($1, $2)', [eventId, organizerId]);
+    await client.query("BEGIN");
+    await client.query('CALL cancel_event($1, $2)', [eventId, organizerId]);
+    await client.query("COMMIT");
     res.status(200).json({ message: 'Event cancelled successfully' });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     switch (err.code) {
       case 'EV404': return res.status(404).json({ error: err.message });
@@ -126,6 +130,8 @@ router.post('/:eventId/cancel', verifyToken, requireOrganizer, async (req, res) 
       default:
         return res.status(500).json({ error: 'Failed to cancel event' });
     }
+  } finally {
+    client.release();
   }
 });
 export default router;

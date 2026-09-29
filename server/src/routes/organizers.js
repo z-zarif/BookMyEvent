@@ -20,25 +20,29 @@ router.post("/register", verifyToken, async (req, res) => {
   // Company name is required by the ORGANIZERS table (NOT NULL), so we
   // validate it here before touching the database.
 
+  const client = await pool.connect();
   try {
+    await client.query("BEGIN");
     // Check if this user is already an organizer, since ORGANIZER_ID is
     // the primary key and re-inserting would just fail with a duplicate error.
-    const existing = await pool.query(
+    const existing = await client.query(
       `SELECT ORGANIZER_ID FROM ORGANIZERS WHERE ORGANIZER_ID = $1`,
       [userId],
     );
 
     if (existing.rows.length > 0) {
+      await client.query("ROLLBACK");
       return res.status(409).json({ error: "You are already an organizer" });
     }
 
     // Insert the new organizer row. ORGANIZER_ID references USERS(USER_ID)
     // directly, so we reuse the same ID instead of generating a new one.
-    await pool.query(
+    await client.query(
       `INSERT INTO ORGANIZERS (ORGANIZER_ID, COMPANY_NAME, BIO)
        VALUES ($1, $2, $3)`,
       [userId, companyName, bio || null],
     );
+    await client.query("COMMIT");
 
     // Re-issue a token with role: "organizer" so the frontend can tell
     // the user has been upgraded, without needing to log in again.
@@ -53,8 +57,11 @@ router.post("/register", verifyToken, async (req, res) => {
       token,
     });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ error: "Could not register as organizer" });
+  } finally {
+    client.release();
   }
 });
 

@@ -25,6 +25,7 @@ export default function Layout() {
           <NavLink to="/requests" className={linkClass}>Money Requests</NavLink>
           <NavLink to="/wallets" className={linkClass}>Wallets</NavLink>
           <NavLink to="/audit-log" className={linkClass}>Audit Log</NavLink>
+          <NavLink to="/reports" className={linkClass}>Reports</NavLink>
         </nav>
 
         <div className="mt-8 pt-6 border-t border-[#1C1C2A]">

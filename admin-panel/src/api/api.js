@@ -34,5 +34,6 @@ export const rejectAddMoneyRequest = (id) =>
 export const getWallets = () => client.get('/admin/wallets');
 export const getTransactions = () => client.get('/admin/transactions');
 export const getAuditLog = () => client.get('/admin/audit-log');
+export const getReports = () => client.get('/admin/reports');
 
 export default client;

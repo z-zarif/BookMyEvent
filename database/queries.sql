@@ -1,6 +1,152 @@
-- **Organizer revenue dashboard** — `EVENTS` → `TICKET_TYPE` → `TICKETS`/`BOOKINGS` → `PAYMENTS`, grouped by event, summing revenue and counting tickets sold per organizer
-- **Event occupancy report** — capacity from `TICKET_TYPE` vs. tickets actually sold, computing a fill percentage per event, ranked
-- **Top customers by spend** — `USERS` → `BOOKINGS` → `PAYMENTS`, grouped by user, summing total spend and booking count
-- **Promo code effectiveness** — `PROMO_CODES` → `PROMO_REDEMPTIONS` → `BOOKINGS`, grouped by code, total discount given and redemption count
-- **Most wishlisted events** — `WISHLIST` → `EVENTS`, grouped by event, counting wishlist adds (good simple one to round things out)
 
+WITH booking_revenue AS (
+    SELECT
+        P.BOOKING_ID,
+        SUM(P.AMOUNT) AS BOOKING_REVENUE
+    FROM PAYMENTS P
+    GROUP BY P.BOOKING_ID
+),
+event_revenue AS (
+    SELECT
+        B.EVENT_ID,
+        SUM(BR.BOOKING_REVENUE)::NUMERIC(12, 2) AS REVENUE
+    FROM BOOKINGS B
+    JOIN booking_revenue BR
+        ON BR.BOOKING_ID = B.BOOKING_ID
+    GROUP BY B.EVENT_ID
+),
+event_ticket_sales AS (
+    SELECT
+        B.EVENT_ID,
+        COUNT(T.TICKET_ID)::INTEGER AS TICKETS_SOLD
+    FROM BOOKINGS B
+    LEFT JOIN TICKETS T
+        ON T.BOOKING_ID = B.BOOKING_ID
+    GROUP BY B.EVENT_ID
+)
+SELECT
+    E.ORGANIZER_ID,
+    E.EVENT_ID,
+    E.TITLE,
+    E.EVENT_DATE_TIME,
+    E.STATUS AS EVENT_STATUS,
+    COALESCE(ER.REVENUE, 0)::NUMERIC(12, 2) AS TOTAL_REVENUE,
+    COALESCE(ETS.TICKETS_SOLD, 0) AS TICKETS_SOLD
+FROM EVENTS E
+LEFT JOIN event_revenue ER
+    ON ER.EVENT_ID = E.EVENT_ID
+LEFT JOIN event_ticket_sales ETS
+    ON ETS.EVENT_ID = E.EVENT_ID
+ORDER BY TOTAL_REVENUE DESC, E.EVENT_DATE_TIME DESC;
+
+
+-- 2. Event occupancy report
+-- QUANTITY_AVAILABLE is the remaining capacity, so capacity is calculated as
+-- currently available tickets plus tickets still present in TICKETS.
+WITH event_capacity AS (
+    SELECT
+        TT.EVENT_ID,
+        SUM(TT.QUANTITY_AVAILABLE)::INTEGER AS REMAINING_CAPACITY
+    FROM TICKET_TYPE TT
+    GROUP BY TT.EVENT_ID
+),
+event_ticket_sales AS (
+    SELECT
+        TT.EVENT_ID,
+        COUNT(T.TICKET_ID)::INTEGER AS TICKETS_SOLD
+    FROM TICKET_TYPE TT
+    LEFT JOIN TICKETS T
+        ON T.TICKET_TYPE_ID = TT.TYPE_ID
+    GROUP BY TT.EVENT_ID
+)
+SELECT
+    E.EVENT_ID,
+    E.ORGANIZER_ID,
+    E.TITLE,
+    COALESCE(ETC.REMAINING_CAPACITY, 0)
+        + COALESCE(ETS.TICKETS_SOLD, 0) AS TOTAL_CAPACITY,
+    COALESCE(ETS.TICKETS_SOLD, 0) AS TICKETS_SOLD,
+    ROUND(
+        100.0 * COALESCE(ETS.TICKETS_SOLD, 0)
+        / NULLIF(
+            COALESCE(ETC.REMAINING_CAPACITY, 0)
+            + COALESCE(ETS.TICKETS_SOLD, 0),
+            0
+        ),
+        2
+    ) AS FILL_PERCENTAGE
+FROM EVENTS E
+LEFT JOIN event_capacity ETC
+    ON ETC.EVENT_ID = E.EVENT_ID
+LEFT JOIN event_ticket_sales ETS
+    ON ETS.EVENT_ID = E.EVENT_ID
+ORDER BY FILL_PERCENTAGE DESC NULLS LAST, TICKETS_SOLD DESC, E.TITLE;
+
+
+-- 3. Top customers by spend
+-- Aggregate payments per booking first so multiple payment rows cannot inflate
+-- the booking count or spend unexpectedly.
+WITH booking_spend AS (
+    SELECT
+        P.BOOKING_ID,
+        SUM(P.AMOUNT) AS BOOKING_SPEND
+    FROM PAYMENTS P
+    GROUP BY P.BOOKING_ID
+)
+SELECT
+    U.USER_ID,
+    U.USER_NAME,
+    U.EMAIL,
+    COALESCE(SUM(BS.BOOKING_SPEND), 0)::NUMERIC(12, 2) AS TOTAL_SPEND,
+    COUNT(DISTINCT B.BOOKING_ID)::INTEGER AS PAID_BOOKING_COUNT
+FROM USERS U
+JOIN BOOKINGS B
+    ON B.USER_ID = U.USER_ID
+JOIN booking_spend BS
+    ON BS.BOOKING_ID = B.BOOKING_ID
+GROUP BY U.USER_ID, U.USER_NAME, U.EMAIL
+ORDER BY TOTAL_SPEND DESC, PAID_BOOKING_COUNT DESC, U.USER_NAME;
+
+
+-- 4. Promo code effectiveness
+SELECT
+    PC.PROMO_ID,
+    PC.CODE,
+    PC.STATUS,
+    PC.DISCOUNT_TYPE,
+    PC.DISCOUNT_VALUE,
+    COUNT(PR.REDEMPTION_ID)::INTEGER AS REDEMPTION_COUNT,
+    COALESCE(SUM(PR.DISCOUNT_APPLIED), 0)::NUMERIC(12, 2)
+        AS TOTAL_DISCOUNT_GIVEN
+FROM PROMO_CODES PC
+LEFT JOIN PROMO_REDEMPTIONS PR
+    ON PR.PROMO_ID = PC.PROMO_ID
+LEFT JOIN BOOKINGS B
+    ON B.BOOKING_ID = PR.BOOKING_ID
+GROUP BY
+    PC.PROMO_ID,
+    PC.CODE,
+    PC.STATUS,
+    PC.DISCOUNT_TYPE,
+    PC.DISCOUNT_VALUE
+ORDER BY TOTAL_DISCOUNT_GIVEN DESC, REDEMPTION_COUNT DESC, PC.CODE;
+
+
+-- 5. Most wishlisted events
+SELECT
+    E.EVENT_ID,
+    E.ORGANIZER_ID,
+    E.TITLE,
+    E.EVENT_DATE_TIME,
+    E.STATUS AS EVENT_STATUS,
+    COUNT(W.USER_ID)::INTEGER AS WISHLIST_COUNT
+FROM EVENTS E
+LEFT JOIN WISHLIST W
+    ON W.EVENT_ID = E.EVENT_ID
+GROUP BY
+    E.EVENT_ID,
+    E.ORGANIZER_ID,
+    E.TITLE,
+    E.EVENT_DATE_TIME,
+    E.STATUS
+ORDER BY WISHLIST_COUNT DESC, E.EVENT_DATE_TIME ASC, E.TITLE;

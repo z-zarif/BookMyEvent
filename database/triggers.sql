@@ -52,6 +52,12 @@ $$
 BEGIN 
     IF NEW.QUANTITY_AVAILABLE<=0 AND NEW.STATUS='active' THEN 
     NEW.STATUS := 'inactive';
+    ELSIF OLD.QUANTITY_AVAILABLE = 0
+          AND NEW.QUANTITY_AVAILABLE > 0
+          AND OLD.STATUS = 'inactive'
+          AND NEW.STATUS = 'inactive' THEN
+    -- Inactive currently means sold out, not manually disabled.
+    NEW.STATUS := 'active';
     END IF;
     RETURN NEW;
     END; 
@@ -208,7 +214,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   v_wallet_id CHAR(15);
 BEGIN
-  IF UPPER(NEW.STATUS) = 'APPROVED' THEN
+  IF OLD.STATUS = 'pending' AND NEW.STATUS = 'approved' THEN
     SELECT WALLET_ID INTO v_wallet_id
     FROM WALLETS
     WHERE USER_ID = NEW.USER_ID;
@@ -233,5 +239,5 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_add_money_request_approved
 BEFORE UPDATE ON ADD_MONEY_REQUESTS
 FOR EACH ROW
-WHEN (OLD.STATUS IS DISTINCT FROM NEW.STATUS)
+WHEN (OLD.STATUS = 'pending' AND NEW.STATUS = 'approved')
 EXECUTE FUNCTION fn_add_money_request_approved();

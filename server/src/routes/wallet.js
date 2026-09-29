@@ -51,18 +51,24 @@ router.post("/add-money", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "amount must be greater than 0" });
   }
 
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
+    await client.query("BEGIN");
+    const result = await client.query(
       `INSERT INTO ADD_MONEY_REQUESTS (REQUEST_ID, USER_ID, AMOUNT)
        VALUES (fn_generate_id('AMR'), $1, $2)
        RETURNING REQUEST_ID, STATUS`,
       [userId, amount],
     );
 
+    await client.query("COMMIT");
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ error: "Could not submit add-money request" });
+  } finally {
+    client.release();
   }
 });
 

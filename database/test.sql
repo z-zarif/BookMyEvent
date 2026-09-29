@@ -137,6 +137,8 @@ WHERE REFERENCE_ID IN ('BKG48067c64f1f5', 'BKG93075f5f7466', 'BKGdd1baff12180', 
   SELECT WALLET_ID, BALANCE FROM WALLETS
 WHERE WALLET_ID IN ('WALefd6f75d47d8', 'WALa2a95a3d5295', 'WALa26bfdb20bf5');
 
+BEGIN;
+
 DROP TABLE IF EXISTS tmp_seed_organizer_ids;
 DROP TABLE IF EXISTS tmp_seed_event_ids;
 DROP TABLE IF EXISTS tmp_seed_booking_ids;
@@ -181,6 +183,4 @@ DROP TABLE tmp_seed_booking_ids;
 DROP TABLE tmp_seed_event_ids;
 DROP TABLE tmp_seed_organizer_ids;
 
-
-   ALTER TABLE TICKET_TYPE
-     ADD CONSTRAINT uq_ticket_type_event_category UNIQUE (EVENT_ID, CATEGORY);
+COMMIT;

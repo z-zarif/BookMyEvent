@@ -8,6 +8,8 @@ CREATE OR REPLACE PROCEDURE cancel_booking(
 )
 LANGUAGE plpgsql
 AS $$
+-- The caller owns the transaction so event cancellation can refund every
+-- booking and update the event atomically.
 DECLARE
     v_bk_status  VARCHAR(20);
     v_owner_id   CHAR(15);
@@ -66,7 +68,6 @@ BEGIN
         (fn_generate_id('WTX'), v_wallet_id, 'refund', v_amount,
          'Refund for cancelled booking', p_booking_id, CURRENT_TIMESTAMP);
 
-    COMMIT;
 END;
 $$;
 
@@ -76,6 +77,7 @@ CREATE OR REPLACE PROCEDURE cancel_event(
 )
 LANGUAGE plpgsql
 AS $$
+-- The caller owns the transaction; do not commit inside the booking loop.
 DECLARE
     v_owner_id  CHAR(15);
     v_status    VARCHAR(20);
@@ -116,6 +118,5 @@ BEGIN
     SET STATUS = 'cancelled'
     WHERE EVENT_ID = p_event_id;
 
-    COMMIT;
 END;
 $$;

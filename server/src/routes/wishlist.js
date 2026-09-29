@@ -40,36 +40,48 @@ router.post("/", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "eventId is required" });
   }
 
+  const client = await pool.connect();
   try {
-    await pool.query(
+    await client.query("BEGIN");
+    await client.query(
       `INSERT INTO WISHLIST (USER_ID, EVENT_ID)
        VALUES ($1, $2)
        ON CONFLICT (USER_ID, EVENT_ID) DO NOTHING`,
       [req.user.user_id, eventId],
     );
 
+    await client.query("COMMIT");
     res.status(201).json({ added: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     if (err.code === "23503") {
       return res.status(404).json({ error: "Event not found" });
     }
     res.status(500).json({ error: "Could not add to wishlist" });
+  } finally {
+    client.release();
   }
 });
 
 // DELETE /wishlist/:eventId
 router.delete("/:eventId", verifyToken, async (req, res) => {
+  const client = await pool.connect();
   try {
-    await pool.query(
+    await client.query("BEGIN");
+    await client.query(
       `DELETE FROM WISHLIST WHERE USER_ID = $1 AND EVENT_ID = $2`,
       [req.user.user_id, req.params.eventId],
     );
 
+    await client.query("COMMIT");
     res.json({ removed: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ error: "Could not remove from wishlist" });
+  } finally {
+    client.release();
   }
 });
 

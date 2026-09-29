@@ -416,14 +416,18 @@ router.get("/:id", verifyToken, async (req, res) => {
 router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
   const { bookingId } = req.params;
   const userId = req.user.user_id;
+  const client = await pool.connect();
 
   try {
-    await pool.query(
+    await client.query("BEGIN");
+    await client.query(
       "CALL cancel_booking($1::char(15), $2::char(15), $3::boolean)",
       [bookingId, userId, true],
     );
+    await client.query("COMMIT");
     res.status(200).json({ message: "Booking cancelled successfully" });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     switch (err.code) {
       case "BK404":
@@ -442,6 +446,8 @@ router.post("/:bookingId/cancel", verifyToken, async (req, res) => {
         console.error("Cancellation database error:", err.message);
         return res.status(500).json({ error: "Failed to cancel booking" });
     }
+  } finally {
+    client.release();
   }
 });
 export default router;
