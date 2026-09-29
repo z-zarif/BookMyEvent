@@ -75,10 +75,6 @@ JOIN pg_namespace n ON p.pronamespace = n.oid
 WHERE p.proname = 'cancel_booking'
   AND n.nspname = 'public';
 
-ALTER TABLE TICKET_TYPE
-  ADD CONSTRAINT uq_ticket_type_event_category UNIQUE (EVENT_ID, CATEGORY);
-
-
 CREATE TEMP TABLE tmp_seed_organizer_ids AS
 SELECT USER_ID FROM USERS WHERE EMAIL LIKE '%@eventia.test';
 
@@ -184,3 +180,21 @@ DROP TABLE tmp_seed_event_ids;
 DROP TABLE tmp_seed_organizer_ids;
 
 COMMIT;
+
+
+
+
+CREATE OR REPLACE FUNCTION fn_mark_completed_events()
+RETURNS INTEGER AS $$
+DECLARE
+  v_updated INTEGER;
+BEGIN
+  UPDATE EVENTS
+  SET STATUS = 'completed'
+  WHERE STATUS = 'scheduled'
+    AND EVENT_DATE_TIME < CURRENT_TIMESTAMP;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+  RETURN v_updated;
+END;
+$$ LANGUAGE plpgsql;

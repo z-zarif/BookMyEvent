@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get("/getevents", async (req, res) => {
   try {
+    await pool.query("SELECT fn_mark_completed_events()");
     const result =
       await pool.query(`SELECT E.TITLE, E.EVENT_ID, U.USER_NAME, E.VENUE,E.EVENT_DATE_TIME,E.DESCRIBE_EVENT,E.STATUS,E.PHOTO_URL
                                         FROM EVENTS E 
@@ -30,6 +31,7 @@ router.get("/getevents", async (req, res) => {
 // and get a TYPE_ID to book against.
 router.get("/:id", async (req, res) => {
   try {
+    await pool.query("SELECT fn_mark_completed_events()");
     const eventResult = await pool.query(
       `SELECT E.EVENT_ID, E.TITLE, E.EVENT_DATE_TIME, E.VENUE, E.DESCRIBE_EVENT, E.STATUS, E.PHOTO_URL, U.USER_NAME
        FROM EVENTS E
@@ -46,7 +48,13 @@ router.get("/:id", async (req, res) => {
     const ticketTypesResult = await pool.query(
       `SELECT TYPE_ID, CATEGORY, QUANTITY_AVAILABLE, STATUS, PRICE
        FROM TICKET_TYPE
-       WHERE EVENT_ID = $1 AND STATUS = 'active'`,
+       WHERE EVENT_ID = $1
+         AND STATUS = 'active'
+         AND EXISTS (
+           SELECT 1
+           FROM EVENTS
+           WHERE EVENT_ID = $1 AND STATUS = 'scheduled'
+         )`,
       [req.params.id],
     );
 
@@ -68,6 +76,12 @@ router.post("/postevent", verifyToken, requireOrganizer, async (req, res) => {
     return res
       .status(400)
       .json({ error: "Title, venue, and ticket types are required" });
+  }
+  const categories = ticketTypes.map((ticketType) => ticketType.category);
+  if (new Set(categories).size !== categories.length) {
+    return res.status(400).json({
+      error: "Each ticket category can only be added once per event",
+    });
   }
   const client = await pool.connect();
   try {
@@ -134,4 +148,60 @@ router.post('/:eventId/cancel', verifyToken, requireOrganizer, async (req, res) 
     client.release();
   }
 });
+
+router.delete("/:eventId", verifyToken, requireOrganizer, async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    const eventResult = await client.query(
+      `SELECT STATUS
+       FROM EVENTS
+       WHERE EVENT_ID = $1 AND ORGANIZER_ID = $2
+       FOR UPDATE`,
+      [req.params.eventId, req.user.user_id],
+    );
+
+    if (eventResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Event not found" });
+    }
+    if (eventResult.rows[0].status === "completed") {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: "Completed events cannot be deleted",
+      });
+    }
+
+    const bookingResult = await client.query(
+      `SELECT 1 FROM BOOKINGS WHERE EVENT_ID = $1 LIMIT 1`,
+      [req.params.eventId],
+    );
+    if (bookingResult.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: "Events with booking history cannot be deleted. Cancel the event instead.",
+      });
+    }
+
+    await client.query(
+      `DELETE FROM TICKET_TYPE WHERE EVENT_ID = $1`,
+      [req.params.eventId],
+    );
+    await client.query(
+      `DELETE FROM EVENTS
+       WHERE EVENT_ID = $1 AND ORGANIZER_ID = $2`,
+      [req.params.eventId, req.user.user_id],
+    );
+    await client.query("COMMIT");
+    res.json({ deleted: true });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ error: "Could not delete event" });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;

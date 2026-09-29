@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMyOrganizerEvents } from '../api/api';
+import { cancelEvent, deleteEvent, getMyOrganizerEvents } from '../api/api';
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -10,6 +10,32 @@ export default function OrganizerDashboard() {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+
+  async function handleDelete(eventId) {
+    if (!window.confirm('Delete this event permanently?')) return;
+    try {
+      await deleteEvent(eventId);
+      setEvents((current) => current.filter((event) => event.event_id !== eventId));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleCancel(eventId) {
+    if (!window.confirm('Cancel this event? All eligible bookings will be refunded.')) return;
+    try {
+      await cancelEvent(eventId);
+      setEvents((current) =>
+        current.map((event) =>
+          event.event_id === eventId
+            ? { ...event, status: 'cancelled' }
+            : event
+        )
+      );
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   useEffect(() => {
     getMyOrganizerEvents()
@@ -68,6 +94,24 @@ export default function OrganizerDashboard() {
               >
                 View Listing
               </Link>
+              {ev.status === 'scheduled' && (
+                <button
+                  type="button"
+                  onClick={() => handleCancel(ev.event_id)}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#F59E0B]/60 text-[#F59E0B] hover:bg-[#F59E0B]/10 transition-colors"
+                >
+                  Cancel Event
+                </button>
+              )}
+              {ev.status !== 'cancelled' && ev.status !== 'completed' && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(ev.event_id)}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#FF3D77]/60 text-[#FF3D77] hover:bg-[#FF3D77]/10 transition-colors"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ))}
         </div>

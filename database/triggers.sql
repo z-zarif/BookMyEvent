@@ -16,12 +16,28 @@ DROP FUNCTION IF EXISTS fn_release_ticket();
 DROP FUNCTION IF EXISTS fn_ticket_type_auto_status();
 DROP FUNCTION IF EXISTS fn_log_ticket_type_change();
 DROP FUNCTION IF EXISTS fn_generate_id(VARCHAR);
+DROP FUNCTION IF EXISTS fn_mark_completed_events();
 
 CREATE OR REPLACE FUNCTION fn_generate_id(prefix VARCHAR)
 RETURNS CHAR(15) AS $$
 BEGIN
   RETURN UPPER(prefix) ||
          SUBSTRING(MD5(CLOCK_TIMESTAMP()::TEXT || RANDOM()::TEXT), 1, 15 - LENGTH(prefix));
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_mark_completed_events()
+RETURNS INTEGER AS $$
+DECLARE
+  v_updated INTEGER;
+BEGIN
+  UPDATE EVENTS
+  SET STATUS = 'completed'
+  WHERE STATUS = 'scheduled'
+    AND EVENT_DATE_TIME < CURRENT_TIMESTAMP;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+  RETURN v_updated;
 END;
 $$ LANGUAGE plpgsql;
 

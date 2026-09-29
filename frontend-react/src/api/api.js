@@ -29,6 +29,7 @@ export const register = (userName, email, password, gender) =>
 export const login = (email, password) =>
   client.post('/auth/login/user', { email, password });
 export const getCurrentUser = () => client.get('/auth/me');
+export const deleteAccount = () => client.delete('/auth/me');
 
 // ---- Events ----
 export const getEvents = () => client.get('/events/getevents');
@@ -37,6 +38,7 @@ export const getEvent = (id) => client.get(`/events/${id}`);
 // Expects { title, date_time, venue, description, ticketTypes: [{category, quantity, price}] }
 export const createEvent = (payload) => client.post('/events/postevent', payload);
 export const cancelEvent = (eventId) => client.post(`/events/${eventId}/cancel`);
+export const deleteEvent = (eventId) => client.delete(`/events/${eventId}`);
 
 // ---- Organizers ----
 export const registerOrganizer = (companyName, bio) =>

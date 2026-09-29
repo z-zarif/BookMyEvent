@@ -1,3 +1,4 @@
 -- Trigger and helper function definitions are authoritative in triggers.sql.
 -- Keep this file as a compatibility no-op for setup scripts that still list
 -- functions.sql; applying it cannot create duplicate audit or wallet effects.
+--!ALL THE ASSOCIATED FUNCTIONS ARE WRITTEN IN TRIGGER.SQL FILE

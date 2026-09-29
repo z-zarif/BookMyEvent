@@ -91,6 +91,7 @@ router.get("/me", verifyToken, async (req, res) => {
 // Lists events created by the logged-in organizer, for their dashboard.
 router.get("/my-events", verifyToken, async (req, res) => {
   try {
+    await pool.query("SELECT fn_mark_completed_events()");
     const result = await pool.query(
       `SELECT EVENT_ID, TITLE, EVENT_DATE_TIME, VENUE, STATUS
        FROM EVENTS

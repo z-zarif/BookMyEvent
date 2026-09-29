@@ -313,6 +313,7 @@ router.get("/audit-log", async (req, res) => {
 // Headline numbers for the admin dashboard.
 router.get("/stats", async (req, res) => {
   try {
+    await pool.query("SELECT fn_mark_completed_events()");
     const result = await pool.query(
       `SELECT
          (SELECT COUNT(*) FROM USERS) AS total_users,
@@ -333,6 +334,7 @@ router.get("/stats", async (req, res) => {
 // All report data is protected by requireAdminAuth above.
 router.get("/reports", async (req, res) => {
   try {
+    await pool.query("SELECT fn_mark_completed_events()");
     const entries = await Promise.all(
       Object.entries(reportQueries).map(async ([name, query]) => [
         name,

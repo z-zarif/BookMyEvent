@@ -27,16 +27,20 @@ router.post("/", verifyToken, async (req, res) => {
   try {
     // 2. Start transaction
     await client.query("BEGIN");
+    await client.query("SELECT fn_mark_completed_events()");
     // 3. Get and lock the requested ticket type
     const { rows: ticketRows } = await client.query(
       `
       SELECT
-        EVENT_ID,
+        TT.EVENT_ID,
         PRICE,
         QUANTITY_AVAILABLE,
-        STATUS
-      FROM TICKET_TYPE
-      WHERE TYPE_ID = $1
+        TT.STATUS,
+        E.STATUS AS EVENT_STATUS,
+        E.EVENT_DATE_TIME
+      FROM TICKET_TYPE TT
+      JOIN EVENTS E ON E.EVENT_ID = TT.EVENT_ID
+      WHERE TT.TYPE_ID = $1
       FOR UPDATE
       `,
       [typeId],
@@ -53,6 +57,12 @@ router.post("/", verifyToken, async (req, res) => {
     // Ticket type must currently be active
     if (ticketType.status !== "active") {
       throw new Error(`Ticket type ${typeId} is not on sale`);
+    }
+    if (
+      ticketType.event_status !== "scheduled" ||
+      new Date(ticketType.event_date_time) <= new Date()
+    ) {
+      throw new Error("This event is no longer available for booking");
     }
 
     // Make sure enough tickets are available

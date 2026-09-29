@@ -36,6 +36,11 @@ export default function CreateEvent() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    const categories = ticketTypes.map((ticketType) => ticketType.category);
+    if (new Set(categories).size !== categories.length) {
+      setError('Each ticket category can only be added once per event.');
+      return;
+    }
     setSubmitting(true);
     try {
       await createEvent({

@@ -106,6 +106,72 @@ router.post("/login/user", async (req, res) => {
       return res.status(403).json({
         error: "Email not found, Please signup first",
       });
+
+      router.delete("/me", verifyToken, async (req, res) => {
+        const client = await pool.connect();
+
+        try {
+          await client.query("BEGIN");
+
+          const organizerEvents = await client.query(
+            `SELECT 1 FROM EVENTS WHERE ORGANIZER_ID = $1 LIMIT 1`,
+            [req.user.user_id],
+          );
+          if (organizerEvents.rows.length > 0) {
+            await client.query("ROLLBACK");
+            return res.status(409).json({
+              error: "Delete your events before deleting your account",
+            });
+          }
+
+          const bookings = await client.query(
+            `SELECT 1 FROM BOOKINGS WHERE USER_ID = $1 LIMIT 1`,
+            [req.user.user_id],
+          );
+          if (bookings.rows.length > 0) {
+            await client.query("ROLLBACK");
+            return res.status(409).json({
+              error: "Accounts with booking history cannot be deleted",
+            });
+          }
+
+          await client.query(
+            `DELETE FROM WALLET_TRANSACTIONS
+             WHERE WALLET_ID IN (SELECT WALLET_ID FROM WALLETS WHERE USER_ID = $1)`,
+            [req.user.user_id],
+          );
+          await client.query(
+            `DELETE FROM ADD_MONEY_REQUESTS WHERE USER_ID = $1`,
+            [req.user.user_id],
+          );
+          await client.query(
+            `DELETE FROM WALLETS WHERE USER_ID = $1`,
+            [req.user.user_id],
+          );
+          await client.query(
+            `DELETE FROM ORGANIZERS WHERE ORGANIZER_ID = $1`,
+            [req.user.user_id],
+          );
+          const result = await client.query(
+            `DELETE FROM USERS WHERE USER_ID = $1 RETURNING USER_ID`,
+            [req.user.user_id],
+          );
+
+          if (result.rows.length === 0) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ error: "User not found" });
+          }
+
+          await client.query("COMMIT");
+          res.json({ deleted: true });
+        } catch (err) {
+          await client.query("ROLLBACK");
+          console.error(err);
+          res.status(500).json({ error: "Could not delete account" });
+        } finally {
+          client.release();
+        }
+      });
     }
     const user = result.rows[0];
     const isPasswordCorrect = await bycrpt.compare(password, user.password);
